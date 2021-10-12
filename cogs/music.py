@@ -12,14 +12,15 @@ class Music(commands.Cog):
         self.players = {}
         self.song_queue = {}
 
-        self.setup()
 
     def setup(self):
         for guild in self.bot.guilds:
             self.song_queue[guild.id] = []
+        
     
     @commands.Cog.listener()
     async def on_ready(self):
+        self.setup()
         print("Music Cog is ready")
 
     async def check_queue(self, ctx):
@@ -37,7 +38,7 @@ class Music(commands.Cog):
         bestAudio = pafy.new(song).getbestaudio()
         ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(bestAudio.url)), after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
         ctx.voice_client.source.volume = 0.5
-        await ctx.send(f"Now playing: ```{bestAudio.title}```")
+        await ctx.send(f"Now playing: `{bestAudio.title}`")
 
     @commands.command()
     async def join(self, ctx):
@@ -64,6 +65,14 @@ class Music(commands.Cog):
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
 
+        if("chungus" in song):
+            await self.play_song(ctx, "song of me making fun of big chungus")
+            return
+
+        if("among" in song):
+            await self.play_song(ctx, "song of me making fun of among us")
+            return
+
         # handle song where song isn't url
         if not ("youtube.com/watch?" in song or "https://youtu.be/" in song):
             await ctx.send("Searching for song. . .")
@@ -71,19 +80,16 @@ class Music(commands.Cog):
             result = await self.search_song(1, song, get_url=True)
 
             if result is None:
-                return await ctx.send("That song does not fucking exist.")
+                return await ctx.send("Thats not a real thing.")
 
             song = result[0]
+            songName = pafy.new(song).title
 
         if ctx.voice_client.source is not None:
             queue_len = len(self.song_queue[ctx.guild.id])
 
-            if queue_len < 10:
-                self.song_queue[ctx.guild.id].append(song)
-                return await ctx.send(f"Added song to queue: {queue_len+1}.")
-
-            else:
-                return await ctx.send("I aint gonna queue more than 10 songs")
+            self.song_queue[ctx.guild.id].append(song)
+            return await ctx.send(f"Added song to queue: ({queue_len+1}) `{songName}`.")
 
         await self.play_song(ctx, song)
 
@@ -117,7 +123,7 @@ class Music(commands.Cog):
 
             i += 1
 
-        embed.set_footer(text="Thanks for using me!")
+        embed.set_footer(text="List of queued songs")
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -131,7 +137,7 @@ class Music(commands.Cog):
         if ctx.author.voice.channel.id != ctx.voice_client.channel.id:
             return await ctx.send("No")
 
-        poll = discord.Embed(title=f"Vote to Skip Song by - {ctx.author.name}#{ctx.author.discriminator}", description="**80% of the voice channel must vote to skip for it to pass.**", colour=discord.Colour.blue())
+        poll = discord.Embed(title=f"Vote to Skip Song by - {ctx.author.name}#{ctx.author.discriminator}", description="**51% of the voice channel must vote to skip for it to pass.**", colour=discord.Colour.blue())
         poll.add_field(name="Skip", value=":white_check_mark:")
         poll.add_field(name="Stay", value=":no_entry_sign:")
         poll.set_footer(text="Voting ends in 15 seconds.")
@@ -160,7 +166,7 @@ class Music(commands.Cog):
         skip = False
 
         if votes[u"\u2705"] > 0:
-            if votes[u"\U0001F6AB"] == 0 or votes[u"\u2705"] / (votes[u"\u2705"] + votes[u"\U0001F6AB"]) > 0.79: # 80% or higher
+            if votes[u"\U0001F6AB"] == 0 or votes[u"\u2705"] / (votes[u"\u2705"] + votes[u"\U0001F6AB"]) > 0.50: # 50% or higher
                 skip = True
                 embed = discord.Embed(title="Skip Successful", description="***Voting to skip the current song was succesful, skipping now.***", colour=discord.Colour.green())
 
