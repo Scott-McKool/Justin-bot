@@ -2,6 +2,8 @@ import discord
 import asyncio
 from discord.ext import commands, tasks
 from discord.ext.commands.errors import BotMissingAnyRole
+import datetime
+import random
 import pafy
 import youtube_dl
 
@@ -11,13 +13,13 @@ class Music(commands.Cog):
         self.bot = client
         self.players = {}
         self.song_queue = {}
-
+        self.FridayPlaying = False
 
     def setup(self):
+        self.friday.start()
         for guild in self.bot.guilds:
             self.song_queue[guild.id] = []
         
-    
     @commands.Cog.listener()
     async def on_ready(self):
         self.setup()
@@ -35,6 +37,8 @@ class Music(commands.Cog):
         return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
     async def play_song(self, ctx, song):
+        if self.FridayPlaying:
+            return
         bestAudio = pafy.new(song).getbestaudio()
         ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(bestAudio.url)), after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
         ctx.voice_client.source.volume = 0.5
@@ -92,24 +96,6 @@ class Music(commands.Cog):
             return await ctx.send(f"Added song to queue: ({queue_len+1}) `{songName}`.")
 
         await self.play_song(ctx, song)
-
-    # @commands.command()
-    # async def search(self, ctx, *, song=None):
-    #     if song is None: return await ctx.send("You forgot to include a song to search for, :slight_frown: .")
-
-    #     await ctx.send("Searching for song. . .")
-
-    #     info = await self.search_song(5, song)
-
-    #     embed = discord.Embed(title=f"Results for '{song}':", description="*You can use these URL's to play an exact song if the one you want isn't the first result.*\n", colour=discord.Colour.red())
-        
-    #     amount = 0
-    #     for entry in info["entries"]:
-    #         embed.description += f"[{entry['title']}]({entry['webpage_url']})\n"
-    #         amount += 1
-
-    #     embed.set_footer(text=f"Displaying the first {amount} results.")
-    #     await ctx.send(embed=embed)
 
     @commands.command()
     async def queue(self, ctx): # display the current guilds queue
@@ -171,7 +157,7 @@ class Music(commands.Cog):
                 embed = discord.Embed(title="Skip Successful", description="***Voting to skip the current song was succesful, skipping now.***", colour=discord.Colour.green())
 
         if not skip:
-            embed = discord.Embed(title="Skip Failed", description="*Voting to skip the current song has failed.*\n\n**Voting failed, the vote requires at least 80% of the members to skip.**", colour=discord.Colour.red())
+            embed = discord.Embed(title="Skip Failed", description="*Voting to skip the current song has failed.*\n\n**Voting failed, the vote requires at least 51% of the members to skip.**", colour=discord.Colour.red())
 
         embed.set_footer(text="Voting has ended.")
 
@@ -200,6 +186,35 @@ class Music(commands.Cog):
         
         ctx.voice_client.resume()
         await ctx.send("The current song has been resumed.")
+
+    async def endFriday(self,voiceClient):
+        self.FridayPlaying = False
+        await voiceClient.disconnect()
+
+    @tasks.loop(hours=1)
+    async def friday(self):
+        if self.FridayPlaying:
+            return
+        print("friday check")
+        weekday = datetime.datetime.today().weekday()+1
+        #if it's friday
+        print(weekday)
+        if( weekday == 5 ):
+            # check to see if 3+ people are in a call
+            for guild in self.bot.guilds:
+                # if there are no songs currently playing in this server
+                if(len(self.song_queue[guild.id]) == 0):
+                    for channel in guild.voice_channels:
+                        if(len(channel.members) > 2 & (random.random()*100 <= 33)):
+                            try:
+                                print("woo hoo")
+                                VCClient = await channel.connect()
+                                self.FridayPlaying = True
+
+                                VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("https://ia801700.us.archive.org/20/items/RebeccaBlackFriday/Rebecca%20Black%20%20-%20Friday.mp3")), after=lambda error:self.bot.loop.create_task(self.endFriday(VCClient)))
+                            except Exception as e:
+                                return
+                        
 
 
 def setup(client):
