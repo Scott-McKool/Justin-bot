@@ -1,4 +1,5 @@
 import discord
+import asyncio
 from discord.ext import commands, tasks
 import sqlite3
 
@@ -136,6 +137,19 @@ class Coins(commands.Cog):
                 member = guild.get_member(user[0])
                 # TODO: add a message for people who gain and lose position
                 await member.add_roles(role)
+
+    @commands.command()
+    async def poll(self, ctx):
+        msg = ctx.message.content[5:]
+        poll = discord.Embed(title="Poll", description=msg, colour=discord.Colour.blue())
+        poll.add_field(name="Agree", value=":white_check_mark:")
+        poll.add_field(name="Disagree", value=":no_entry_sign:")
+        poll.set_footer(text="Poll initiated by "+ctx.message.author.name)
+
+        poll_msg = await ctx.send(embed=poll)
+
+        await poll_msg.add_reaction(u"\u2705") # yes
+        await poll_msg.add_reaction(u"\U0001F6AB") # no
 
     @commands.command(aliases=["eco", "economy", "coins"])
     async def _eco(self, ctx):
