@@ -62,6 +62,53 @@ class Music(commands.Cog):
         await ctx.send("Not in a channel, dumbass.")
 
     @commands.command()
+    async def shutup(self, ctx, member : discord.Member):
+        userID = member.id
+        if userID == None:
+            await ctx.send("you gotta give a person to shutup")
+            return
+        poll = discord.Embed(title=ctx.message.author.name+" wants to shut up"+member.name+" for 30 minutes", description=member.name+" will not be able to play sounds for 30 minutes", colour=discord.Colour.blue())
+        poll.add_field(name="Mute", value=":white_check_mark:")
+        poll.add_field(name="Don't Mute", value=":no_entry_sign:")
+        poll.set_footer(text="Voting ends in 15 seconds.")
+
+        poll_msg = await ctx.send(embed=poll) # only returns temporary message, we need to get the cached message to get the reactions
+        poll_id = poll_msg.id
+
+        await poll_msg.add_reaction(u"\u2705") # yes
+        await poll_msg.add_reaction(u"\U0001F6AB") # no
+        
+        await asyncio.sleep(15) # 15 seconds to vote
+
+        poll_msg = await ctx.channel.fetch_message(poll_id)
+        
+        votes = {u"\u2705": 0, u"\U0001F6AB": 0}
+        reacted = []
+
+        for reaction in poll_msg.reactions:
+            if reaction.emoji in [u"\u2705", u"\U0001F6AB"]:
+                async for user in reaction.users():
+                    if user.voice.channel.id == ctx.voice_client.channel.id and user.id not in reacted and not user.bot:
+                        votes[reaction.emoji] += 1
+
+                        reacted.append(user.id)
+
+        skip = False
+
+        if votes[u"\u2705"] > 0:
+            if votes[u"\U0001F6AB"] == 0 or votes[u"\u2705"] / (votes[u"\u2705"] + votes[u"\U0001F6AB"]) > 0.50: # 50% or higher
+                skip = True
+                embed = discord.Embed(title="Mute Successful", description="***"+member.name+" is can't play songs for 30 minutes***", colour=discord.Colour.green())
+
+        if not skip:
+            embed = discord.Embed(title="Mute Failed", description="*Voting to shutup someone has failed.*\n\n**vote requires at least 51% of the members to affirm.**", colour=discord.Colour.red())
+
+        embed.set_footer(text="Voting has ended.")
+
+        await poll_msg.clear_reactions()
+        await poll_msg.edit(embed=embed)
+
+    @commands.command()
     async def play(self, ctx, *, song=None):
         if song is None:
             return await ctx.send("You gotta list a song. . .")
@@ -69,16 +116,20 @@ class Music(commands.Cog):
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
 
+        if("hours" in song):
+            await ctx.send("fuck you. no")
+            return
+
         if("chungus" in song):
-            await self.play_song(ctx, "song of me making fun of big chungus")
+            await ctx.send("fuck you. no")
             return
 
         if("among" in song):
-            await self.play_song(ctx, "song of me making fun of among us")
+            await ctx.send("fuck you. no")
             return
 
         # handle song where song isn't url
-        if not ("youtube.com/watch?" in song or "https://youtu.be/" in song):
+        if not ("http" in song):
             await ctx.send("Searching for song. . .")
 
             result = await self.search_song(1, song, get_url=True)
@@ -87,7 +138,7 @@ class Music(commands.Cog):
                 return await ctx.send("Thats not a real thing.")
 
             song = result[0]
-            songName = pafy.new(song).title
+        songName = pafy.new(song).title
 
         if ctx.voice_client.source is not None:
             queue_len = len(self.song_queue[ctx.guild.id])
@@ -198,22 +249,25 @@ class Music(commands.Cog):
         print("friday check")
         weekday = datetime.datetime.today().weekday()+1
         #if it's friday
-        print(weekday)
         if( weekday == 5 ):
-            # check to see if 3+ people are in a call
-            for guild in self.bot.guilds:
-                # if there are no songs currently playing in this server
-                if(len(self.song_queue[guild.id]) == 0):
-                    for channel in guild.voice_channels:
-                        if(len(channel.members) > 2 & (random.random()*100 <= 33)):
-                            try:
-                                print("woo hoo")
-                                VCClient = await channel.connect()
-                                self.FridayPlaying = True
+            randomCheck = random.random()*100
+            shouldFriday = randomCheck <= 33
+            if(shouldFriday):
+                # check to see if 3+ people are in a call
+                for guild in self.bot.guilds:
+                    # if there are no songs currently playing in this server
+                    if(len(self.song_queue[guild.id]) == 0):
+                        for channel in guild.voice_channels:
+                            print(randomCheck)
+                            if(len(channel.members) > 2):
+                                try:
+                                    print("woo hoo")
+                                    VCClient = await channel.connect()
+                                    self.FridayPlaying = True
 
-                                VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("https://ia801700.us.archive.org/20/items/RebeccaBlackFriday/Rebecca%20Black%20%20-%20Friday.mp3")), after=lambda error:self.bot.loop.create_task(self.endFriday(VCClient)))
-                            except Exception as e:
-                                return
+                                    VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("https://ia801700.us.archive.org/20/items/RebeccaBlackFriday/Rebecca%20Black%20%20-%20Friday.mp3")), after=lambda error:self.bot.loop.create_task(self.endFriday(VCClient)))
+                                except Exception as e:
+                                    return
                         
 
 
