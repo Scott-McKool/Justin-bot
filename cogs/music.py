@@ -11,12 +11,14 @@ class Music(commands.Cog):
 
     def __init__(self, client):
         self.bot = client
+        self.mutedPlayers = {}
         self.players = {}
         self.song_queue = {}
         self.FridayPlaying = False
 
     def setup(self):
         self.friday.start()
+        self.unMute.start()
         for guild in self.bot.guilds:
             self.song_queue[guild.id] = []
         
@@ -98,7 +100,8 @@ class Music(commands.Cog):
         if votes[u"\u2705"] > 0:
             if votes[u"\U0001F6AB"] == 0 or votes[u"\u2705"] / (votes[u"\u2705"] + votes[u"\U0001F6AB"]) > 0.50: # 50% or higher
                 skip = True
-                embed = discord.Embed(title="Mute Successful", description="***"+member.name+" is can't play songs for 30 minutes***", colour=discord.Colour.green())
+                self.mutedPlayers[userID] = 30 # number of minutes to mute
+                embed = discord.Embed(title="Mute Successful", description="***"+member.name+" can't play songs for 30 minutes***", colour=discord.Colour.green())
 
         if not skip:
             embed = discord.Embed(title="Mute Failed", description="*Voting to shutup someone has failed.*\n\n**vote requires at least 51% of the members to affirm.**", colour=discord.Colour.red())
@@ -108,8 +111,18 @@ class Music(commands.Cog):
         await poll_msg.clear_reactions()
         await poll_msg.edit(embed=embed)
 
-    @commands.command()
+    @tasks.loop(minutes=1)
+    async def unMute(self):
+        for user in self.mutedPlayers:
+            if(self.mutedPlayers[user] > 0):
+                self.mutedPlayers[user] = self.mutedPlayers[user] - 1
+
+    @commands.command(aliases=["Play"])
     async def play(self, ctx, *, song=None):
+        if(ctx.author.id in self.mutedPlayers):
+            if(self.mutedPlayers[ctx.author.id] > 0):
+                return await ctx.send("fuck you, you're muted for another "+str(self.mutedPlayers[ctx.author.id])+" minutes, send me a postcard from blocksvile")
+
         if song is None:
             return await ctx.send("You gotta list a song. . .")
 
