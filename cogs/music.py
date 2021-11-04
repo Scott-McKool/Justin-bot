@@ -14,7 +14,7 @@ class Music(commands.Cog):
         self.mutedPlayers = {}
         self.players = {}
         self.song_queue = {}
-        self.FridayPlaying = False
+        self.songPlaying = False
 
     def setup(self):
         self.friday.start()
@@ -31,6 +31,9 @@ class Music(commands.Cog):
         if len(self.song_queue[ctx.guild.id]) > 0:
             await self.play_song(ctx, self.song_queue[ctx.guild.id][0])
             self.song_queue[ctx.guild.id].pop(0)
+        else:
+            self.songPlaying = False
+
 
     async def search_song(self, amount, song, get_url=False):
         info = await self.bot.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL({"format" : "bestaudio", "quiet" : True}).extract_info(f"ytsearch{amount}:{song}", download=False, ie_key="YoutubeSearch"))
@@ -39,8 +42,6 @@ class Music(commands.Cog):
         return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
     async def play_song(self, ctx, song):
-        if self.FridayPlaying:
-            return
         bestAudio = pafy.new(song).getbestaudio()
         ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(bestAudio.url)), after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
         ctx.voice_client.source.volume = 0.5
@@ -129,7 +130,7 @@ class Music(commands.Cog):
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
 
-        if("hours" in song):
+        if("hour" in song):
             await ctx.send("fuck you. no")
             return
 
@@ -153,12 +154,12 @@ class Music(commands.Cog):
             song = result[0]
         songName = pafy.new(song).title
 
-        if ctx.voice_client.source is not None:
+        if self.songPlaying:
             queue_len = len(self.song_queue[ctx.guild.id])
 
             self.song_queue[ctx.guild.id].append(song)
             return await ctx.send(f"Added song to queue: ({queue_len+1}) `{songName}`.")
-
+        self.songPlaying = True
         await self.play_song(ctx, song)
 
     @commands.command()
@@ -252,12 +253,12 @@ class Music(commands.Cog):
         await ctx.send("The current song has been resumed.")
 
     async def endFriday(self,voiceClient):
-        self.FridayPlaying = False
+        self.songPlaying = False
         await voiceClient.disconnect()
 
     @tasks.loop(hours=1)
     async def friday(self):
-        if self.FridayPlaying:
+        if self.songPlaying:
             return
         print("friday check")
         weekday = datetime.datetime.today().weekday()+1
