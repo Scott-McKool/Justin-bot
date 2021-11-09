@@ -123,33 +123,26 @@ class Coins(commands.Cog):
         '''
         goes through the database and gives the top 25% of coin holders the "wealthy" role
         '''
-        #bad
-        guildID = 381254387877675008
-        guild = self.bot.get_guild(guildID)
+        # all of the entries in the coin database
         self.cur.execute("SELECT * FROM coins")
         result = self.cur.fetchall()
         avg = self.startingCoins
-        role = discord.utils.get(guild.roles, name="Wealthy")
-        for user in result:
-            # if the number of coins is 1.5 times the average or more
-            if(user[1] >= avg*1.5):
-                # give wealthy role
-                member = guild.get_member(user[0])
-                # TODO: add a message for people who gain and lose position
-                await member.add_roles(role)
 
-    @commands.command()
-    async def poll(self, ctx):
-        msg = ctx.message.content[5:]
-        poll = discord.Embed(title="Poll", description=msg, colour=discord.Colour.blue())
-        poll.add_field(name="Agree", value=":white_check_mark:")
-        poll.add_field(name="Disagree", value=":no_entry_sign:")
-        poll.set_footer(text="Poll initiated by "+ctx.message.author.name)
-
-        poll_msg = await ctx.send(embed=poll)
-
-        await poll_msg.add_reaction(u"\u2705") # yes
-        await poll_msg.add_reaction(u"\U0001F6AB") # no
+        for guild in self.bot.guilds:
+            role = discord.utils.get(guild.roles, name="Wealthy")
+            if(not role):
+                print("server \""+str(guild.name)+"\" does not have a \"Wealthy\" role, making wealthy role now")
+                await guild.create_role(name="Wealthy", colour=discord.Colour(0x00ff00))
+                print("added \"Wealthy\" role to \""+str(guild.name)+"\"")
+                continue
+            for user in result:
+                # if the number of coins is 1.5 times the average or more
+                if(user[1] >= avg*1.5):
+                    # give wealthy role
+                    member = guild.get_member(user[0])
+                    if(not member):
+                        continue
+                    await member.add_roles(role)
 
     @commands.command(aliases=["eco", "economy", "coins"])
     async def _eco(self, ctx):
