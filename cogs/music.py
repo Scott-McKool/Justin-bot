@@ -59,6 +59,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def leave(self, ctx):
+        if(self.songPlaying):
+            return await ctx.send("i'm playing music right now, shut up")
+            
         if ctx.voice_client is not None:
             return await ctx.voice_client.disconnect()
 
@@ -122,7 +125,7 @@ class Music(commands.Cog):
     async def play(self, ctx, *, song=None):
         if(ctx.author.id in self.mutedPlayers):
             if(self.mutedPlayers[ctx.author.id] > 0):
-                return await ctx.send("fuck you, you're muted for another "+str(self.mutedPlayers[ctx.author.id])+" minutes, send me a postcard from blocksvile")
+                return await ctx.send("fuck you, you're muted for another "+str(self.mutedPlayers[ctx.author.id])+" minutes, send me a postcard from blocksville")
 
         if song is None:
             return await ctx.send("You gotta list a song. . .")
@@ -260,7 +263,6 @@ class Music(commands.Cog):
     async def friday(self):
         if self.songPlaying:
             return
-        print("friday check")
         weekday = datetime.datetime.today().weekday()+1
         #if it's friday
         if( weekday == 5 ):
@@ -272,10 +274,8 @@ class Music(commands.Cog):
                     # if there are no songs currently playing in this server
                     if(len(self.song_queue[guild.id]) == 0):
                         for channel in guild.voice_channels:
-                            print(randomCheck)
                             if(len(channel.members) > 2):
                                 try:
-                                    print("woo hoo")
                                     VCClient = await channel.connect()
                                     self.FridayPlaying = True
 
