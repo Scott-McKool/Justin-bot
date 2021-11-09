@@ -12,6 +12,8 @@ class Coins(commands.Cog):
         self.db = sqlite3.connect("coins.db")
         self.cur = self.db.cursor()
 
+        self.wealthyRole = "Wealthy" # the roll to give people who are wealthy
+
         self.cur.execute("""DELETE FROM coins WHERE id = :id""",{"coins" : 49, "id" : 663214109726081036})
         self.db.commit()
 
@@ -22,7 +24,6 @@ class Coins(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.rich.start()
         print("Coins Cog is ready")
 
     def getCoins(self, userID):
@@ -37,12 +38,14 @@ class Coins(commands.Cog):
             return self.getCoins(userID)
         return result[1]
 
-    def setCoins(self, userID, coins):
+    async def setCoins(self, userID, coins):
         '''
         Sets the coin balance of an existing entry in the database
         '''
         self.cur.execute("""UPDATE coins SET coins = :coins WHERE id = :id""",{"coins" : coins, "id" : userID})
         self.db.commit()
+        # this is the only command that changes the coins in the database, so here is a good plce to update the rich people list
+        await self.rich()
 
     async def addCoins(self, userID, coins):
         '''
@@ -50,7 +53,7 @@ class Coins(commands.Cog):
         Relies on the setCoin meathod
         '''
         curCoins = self.getCoins(userID)
-        self.setCoins(userID, curCoins+coins)
+        await self.setCoins(userID, curCoins+coins)
 
     def account(self, userID):
         '''
@@ -82,9 +85,6 @@ class Coins(commands.Cog):
                 await ctx.send("user does not have an account, they must use !account to make one.")
                 return
             await ctx.send("```"+str(user)+" has a balance of "+str(userCoins)+" coins.```")
-
-
-
 
     @commands.command()
     async def pay(self, ctx, member : discord.Member, coins, *, notes = None):
@@ -118,7 +118,6 @@ class Coins(commands.Cog):
         return
 
 
-    @tasks.loop(seconds=5)
     async def rich(self):
         '''
         goes through the database and gives the top 25% of coin holders the "wealthy" role
@@ -129,20 +128,24 @@ class Coins(commands.Cog):
         avg = self.startingCoins
 
         for guild in self.bot.guilds:
-            role = discord.utils.get(guild.roles, name="Wealthy")
+            role = discord.utils.get(guild.roles, name=self.wealthyRole)
             if(not role):
-                print("server \""+str(guild.name)+"\" does not have a \"Wealthy\" role, making wealthy role now")
-                await guild.create_role(name="Wealthy", colour=discord.Colour(0x00ff00))
-                print("added \"Wealthy\" role to \""+str(guild.name)+"\"")
+                print("server \""+str(guild.name)+"\" does not have a wealthy role, making wealthy role \""+self.wealthyRole+"\" now. . .")
+                await guild.create_role(name=self.wealthyRole, colour=discord.Colour(0x00ff00))
+                print("added \""+self.wealthyRole+"\" role to \""+str(guild.name)+"\"")
                 continue
             for user in result:
                 # if the number of coins is 1.5 times the average or more
+                member = guild.get_member(user[0])
+                if(not member):
+                    continue
                 if(user[1] >= avg*1.5):
                     # give wealthy role
-                    member = guild.get_member(user[0])
-                    if(not member):
-                        continue
                     await member.add_roles(role)
+                else:
+                    # take away wealthy role
+                    if(role in member.roles):
+                        await member.remove_roles(role)
 
     @commands.command(aliases=["eco", "economy", "coins"])
     async def _eco(self, ctx):
