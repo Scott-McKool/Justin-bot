@@ -3,6 +3,8 @@ from discord.ext import commands, tasks
 import datetime
 from cogs.coins import Coins as coins
 import os
+import urllib.request
+import time
 
 PREFIX = "!"
 
@@ -55,5 +57,16 @@ for filename in os.listdir("./cogs"):
     if(filename.endswith(".py")):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
-bot.run(TOKEN)
+# wait till an internet connection is established before trying to login
+hasConnected = False
+while(not hasConnected):
+    try:
+        # will throw an error if not on internet
+        urllib.request.urlopen("http://google.com")
+    except Exception as e:
+        print("failed to log in, not connected to internet, retrying in 10 seconds. . .")
+        time.sleep(10)
+        continue
+    bot.run(TOKEN)
+    hasConnected = True
 
