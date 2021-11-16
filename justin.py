@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 import datetime
-from cogs.coins import Coins as coins
 import os
 import urllib.request
 import time
@@ -36,6 +35,12 @@ async def poll(ctx):
 
     await poll_msg.add_reaction(u"\u2705") # yes
     await poll_msg.add_reaction(u"\U0001F6AB") # no
+
+@bot.command()
+async def pfp(ctx, member : discord.Member):
+    if(not member):
+        return await ctx.send("invalid member")
+    return await ctx.send(member.avatar_url)
 
 @tasks.loop(seconds=10)
 async def change_status():
