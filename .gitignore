@@ -1,0 +1,6 @@
+# ignore python cache files
+*.pyc
+
+# ignore garbage made by VSCode
+build/
+.vscode/
