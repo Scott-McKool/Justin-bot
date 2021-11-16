@@ -1,5 +1,6 @@
 # ignore python cache files
 *.pyc
+cogs/__pycache__/
 
 # ignore garbage made by VSCode
 build/
