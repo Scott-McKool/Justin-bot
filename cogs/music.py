@@ -1,7 +1,6 @@
 import discord
 import asyncio
 from discord.ext import commands, tasks
-from discord.ext.commands.errors import BotMissingAnyRole
 import datetime
 import random
 import pafy
@@ -15,6 +14,7 @@ class Music(commands.Cog):
         self.players = {}
         self.song_queue = {}
         self.songPlaying = False
+        self.isFriday = False
 
     def setup(self):
         self.friday.start()
@@ -76,7 +76,7 @@ class Music(commands.Cog):
         poll = discord.Embed(title=ctx.message.author.name+" wants to shut up"+member.name+" for 30 minutes", description=member.name+" will not be able to play sounds for 30 minutes", colour=discord.Colour.blue())
         poll.add_field(name="Mute", value=":white_check_mark:")
         poll.add_field(name="Don't Mute", value=":no_entry_sign:")
-        poll.set_footer(text="Voting ends in 15 seconds.")
+        poll.set_footer(text="Voting ends in 10 seconds.")
 
         poll_msg = await ctx.send(embed=poll) # only returns temporary message, we need to get the cached message to get the reactions
         poll_id = poll_msg.id
@@ -84,7 +84,7 @@ class Music(commands.Cog):
         await poll_msg.add_reaction(u"\u2705") # yes
         await poll_msg.add_reaction(u"\U0001F6AB") # no
         
-        await asyncio.sleep(15) # 15 seconds to vote
+        await asyncio.sleep(10) # 15 seconds to vote
 
         poll_msg = await ctx.channel.fetch_message(poll_id)
         
@@ -123,6 +123,10 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["Play"])
     async def play(self, ctx, *, song=None):
+
+        if self.isFriday:
+            return await ctx.send("shut the fuck up, it's friday")
+
         if(ctx.author.id in self.mutedPlayers):
             if(self.mutedPlayers[ctx.author.id] > 0):
                 return await ctx.send("fuck you, you're muted for another "+str(self.mutedPlayers[ctx.author.id])+" minutes, send me a postcard from blocksville")
@@ -182,6 +186,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx):
+        if self.isFriday:
+            return await ctx.send("shut the fuck up, it's friday")
         if ctx.voice_client is None:
             return await ctx.send("I am not playing any song.")
 
@@ -256,7 +262,7 @@ class Music(commands.Cog):
         await ctx.send("The current song has been resumed.")
 
     async def endFriday(self,voiceClient):
-        self.songPlaying = False
+        self.isFriday = False
         await voiceClient.disconnect()
 
     @tasks.loop(hours=1)
@@ -267,7 +273,7 @@ class Music(commands.Cog):
         #if it's friday
         if( weekday == 5 ):
             randomCheck = random.random()*100
-            shouldFriday = randomCheck <= 33
+            shouldFriday = randomCheck <= 330
             if(shouldFriday):
                 # check to see if 3+ people are in a call
                 for guild in self.bot.guilds:
@@ -277,7 +283,7 @@ class Music(commands.Cog):
                             if(len(channel.members) > 2):
                                 try:
                                     VCClient = await channel.connect()
-                                    self.FridayPlaying = True
+                                    self.isFriday = True
 
                                     VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("https://ia801700.us.archive.org/20/items/RebeccaBlackFriday/Rebecca%20Black%20%20-%20Friday.mp3")), after=lambda error:self.bot.loop.create_task(self.endFriday(VCClient)))
                                 except Exception as e:
