@@ -137,18 +137,6 @@ class Music(commands.Cog):
         if ctx.voice_client is None:
             await ctx.author.voice.channel.connect()
 
-        if("hour" in song):
-            await ctx.send("fuck you. no")
-            return
-
-        if("chungus" in song):
-            await ctx.send("fuck you. no")
-            return
-
-        if("among" in song):
-            await ctx.send("fuck you. no")
-            return
-
         # handle song where song isn't url
         if not ("http" in song):
             await ctx.send("Searching for song. . .")
@@ -160,6 +148,18 @@ class Music(commands.Cog):
 
             song = result[0]
         songName = pafy.new(song).title
+
+        if("hour" in songName.lower()):
+            await ctx.send("fuck you. no")
+            return
+
+        if("chungus" in songName.lower()):
+            await ctx.send("fuck you. no")
+            return
+
+        if("among" in songName.lower()):
+            await ctx.send("fuck you. no")
+            return
 
         if self.songPlaying:
             queue_len = len(self.song_queue[ctx.guild.id])
@@ -183,6 +183,23 @@ class Music(commands.Cog):
 
         embed.set_footer(text="List of queued songs")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def fskip(self, ctx):
+        if ctx.author.id != 260671074763669504:
+            return await ctx.send(ctx.author.id)
+
+        if not self.songPlaying and not self.isFriday:
+            return await ctx.send("I am not playing any song.")
+
+        if ctx.author.voice is None:
+            return await ctx.send("You are not connected to any voice channel.")
+
+        if ctx.author.voice.channel.id != ctx.voice_client.channel.id:
+            return await ctx.send("No")
+
+        ctx.voice_client.stop()
+        await ctx.send("skipping the current song")
 
     @commands.command()
     async def skip(self, ctx):
