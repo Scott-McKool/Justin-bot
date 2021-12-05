@@ -150,16 +150,13 @@ class Music(commands.Cog):
         songName = pafy.new(song).title
 
         if("hour" in songName.lower()):
-            await ctx.send("fuck you. no")
-            return
+            song = "https://www.youtube.com/watch?v=Ma6BhN_DHTo"
 
         if("chungus" in songName.lower()):
-            await ctx.send("fuck you. no")
-            return
+            song = "https://www.youtube.com/watch?v=Ma6BhN_DHTo"
 
         if("among" in songName.lower()):
-            await ctx.send("fuck you. no")
-            return
+            song = "https://www.youtube.com/watch?v=Ma6BhN_DHTo"
 
         if self.songPlaying:
             queue_len = len(self.song_queue[ctx.guild.id])
