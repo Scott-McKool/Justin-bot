@@ -5,3 +5,6 @@ cogs/__pycache__/*
 # ignore garbage made by VSCode
 build/
 .vscode/
+
+# ignore my raspberry pi setup
+raspberryPi.txt

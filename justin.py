@@ -7,7 +7,7 @@ import time
 
 PREFIX = "!"
 
-TOKEN = "NjYzMjE0MTA5NzI2MDgxMDM2.XhFYgA.daGyAeZKQEK7k2i1JzBZ5ey-5ko"
+TOKEN = "NjYzMjE0MTA5NzI2MDgxMDM2.XhFQRQ.5uhTIzQp_MRrTauge8DQ2vu9uE8"
 
 coolIntents = discord.Intents.default()
 coolIntents.members = True
@@ -63,8 +63,7 @@ for filename in os.listdir("./cogs"):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
 # wait till an internet connection is established before trying to login
-hasConnected = False
-while(not hasConnected):
+while(True):
     try:
         # will throw an error if not on internet
         urllib.request.urlopen("http://google.com")
@@ -73,5 +72,5 @@ while(not hasConnected):
         time.sleep(10)
         continue
     bot.run(TOKEN)
-    hasConnected = True
+    break
 

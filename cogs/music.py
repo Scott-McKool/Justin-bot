@@ -142,7 +142,7 @@ class Music(commands.Cog):
             await ctx.send("Searching for song. . .")
 
             result = await self.search_song(1, song, get_url=True)
-
+            
             if result is None:
                 return await ctx.send("Thats not a real thing.")
 
@@ -184,7 +184,7 @@ class Music(commands.Cog):
     @commands.command()
     async def fskip(self, ctx):
         if ctx.author.id != 260671074763669504:
-            return await ctx.send(ctx.author.id)
+            return await ctx.send("fuck you, no")
 
         if not self.songPlaying and not self.isFriday:
             return await ctx.send("I am not playing any song.")

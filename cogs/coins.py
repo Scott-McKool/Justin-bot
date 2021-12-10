@@ -1,6 +1,5 @@
 import discord
-import asyncio
-from discord.ext import commands, tasks
+from discord.ext import commands
 import sqlite3
 
 class Coins(commands.Cog):
@@ -20,7 +19,7 @@ class Coins(commands.Cog):
         # self.cur.execute("""CREATE TABLE coins (id integer, coins integer)""")
         # self.db.commit()
         # help message for the coins commands
-        self.coinsCommands = "```Coins Help: \n !account // makes an account under your name \n !balance // will show the balance of your account \n !balance <@user> // show the balance of the mentioned account \n !pay <@user> <amount> <note> // transfers the given amount of money to the user```"
+        self.coinsCommands = "```Coins Help: \n!balance // will show the balance of your account \n!balance <@user> // show the balance of the mentioned account \n!pay <@user> <amount> <note> // transfers the given amount of money to the user```"
 
     @commands.Cog.listener()
     async def on_ready(self):
