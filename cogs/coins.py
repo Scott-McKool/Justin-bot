@@ -9,16 +9,16 @@ class Coins(commands.Cog):
         self.bot = client
         # the ammount of coins given to a new account
         self.startingCoins = 50
-        self.db = sqlite3.connect("coins.db")
+        self.db = sqlite3.connect("/home/pi/Desktop/Justin-bot/coins.db")
         self.cur = self.db.cursor()
 
         self.wealthyRole = "Wealthy" # the roll to give people who are wealthy
 
-        self.cur.execute("""DELETE FROM coins WHERE id = :id""",{"coins" : 49, "id" : 663214109726081036})
-        self.db.commit()
+        #self.cur.execute("""DELETE FROM coins WHERE id = :id""",{"coins" : 49, "id" : 663214109726081036})
+        #self.db.commit()
 
-        # self.cur.execute("""CREATE TABLE coins (id integer, coins integer)""")
-        # self.db.commit()
+        #self.cur.execute("""CREATE TABLE coins (id integer, coins integer)""")
+        #self.db.commit()
         # help message for the coins commands
         self.coinsCommands = "```Coins Help: \n !account // makes an account under your name \n !balance // will show the balance of your account \n !balance <@user> // show the balance of the mentioned account \n !pay <@user> <amount> <note> // transfers the given amount of money to the user```"
 

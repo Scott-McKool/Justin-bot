@@ -42,25 +42,18 @@ async def pfp(ctx, member : discord.Member):
         return await ctx.send("invalid member")
     return await ctx.send(member.avatar_url)
 
-@bot.command()
-async def lol(ctx):
-    eastern = timezone("US/Eastern")
-    date = eastern.localize(datetime(2021, 12, 9, 0, 0))
-    return await ctx.send(date)
-
 @tasks.loop(seconds=10)
-async def change_status():
-    date = datetime(2021, 12, 10, 0, 0)
+async def change_status():    date = datetime.datetime(2021, 12, 9, 10)
     event = "till fall semester ends"
     rawTimeString = str(date - datetime.datetime.now())
     if rawTimeString.__contains__(","):
         days , timeTillSchool = rawTimeString.split(",")
     else:
-        days = "0"
+        days = ""
         timeTillSchool = rawTimeString
     hours, minutes = timeTillSchool.split(":")[:-1]
-    minutes = str(int(minutes))
-    string = (days[:-5].zfill(1))+"d:"+(hours[1:].zfill(2))+"h:"+(minutes.zfill(2))+"m " + event
+    minutes = str(int(minutes)+1)
+    string = days[:-5]+"d:"+hours[1:]+"h:"+minutes+"m " + event
     await bot.change_presence(activity=discord.Game(string))
 
 
