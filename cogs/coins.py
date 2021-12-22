@@ -12,6 +12,7 @@ class Coins(commands.Cog):
         self.cur = self.db.cursor()
 
         self.wealthyRole = "Wealthy" # the roll to give people who are wealthy
+        self.poorRole = "Poor" # the roll to give people who are poor!
 
         #self.cur.execute("""DELETE FROM coins WHERE id = :id""",{"coins" : 49, "id" : 663214109726081036})
         #self.db.commit()
@@ -127,24 +128,39 @@ class Coins(commands.Cog):
         avg = self.startingCoins
 
         for guild in self.bot.guilds:
-            role = discord.utils.get(guild.roles, name=self.wealthyRole)
-            if(not role):
+            wealthyRole = discord.utils.get(guild.roles, name=self.wealthyRole)
+            poorRole = discord.utils.get(guild.roles, name=self.wealthyRole)
+            if(not wealthyRole):
                 print("server \""+str(guild.name)+"\" does not have a wealthy role, making wealthy role \""+self.wealthyRole+"\" now. . .")
                 await guild.create_role(name=self.wealthyRole, colour=discord.Colour(0x00ff00))
                 print("added \""+self.wealthyRole+"\" role to \""+str(guild.name)+"\"")
                 continue
+            if(not poorRole):
+                print("server \""+str(guild.name)+"\" does not have a poor role, making poor role \""+self.poorRole+"\" now. . .")
+                await guild.create_role(name=self.poorRole, colour=discord.Colour(0x8A6430))
+                print("added \""+self.poorRole+"\" role to \""+str(guild.name)+"\"")
+                continue
+            
             for user in result:
-                # if the number of coins is 1.5 times the average or more
                 member = guild.get_member(user[0])
+                # if the number of coins is 0.5 times the average or less
                 if(not member):
                     continue
+                if(user[1] <= avg*0.5):
+                    # give poor role
+                    await member.add_roles(poorRole)
+                else:
+                    # take away poor role
+                    if(poorRole in member.roles):
+                        await member.remove_roles(poorRole)
+                # if the number of coins is 1.5 times the average or more
                 if(user[1] >= avg*1.5):
                     # give wealthy role
-                    await member.add_roles(role)
+                    await member.add_roles(wealthyRole)
                 else:
                     # take away wealthy role
-                    if(role in member.roles):
-                        await member.remove_roles(role)
+                    if(wealthyRole in member.roles):
+                        await member.remove_roles(wealthyRole)
 
     @commands.command(aliases=["eco", "economy", "coins"])
     async def _eco(self, ctx):
