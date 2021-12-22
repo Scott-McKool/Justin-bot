@@ -14,7 +14,7 @@ class Jokes(commands.Cog):
 
     @commands.command()
     async def joke(self, ctx):
-        joke = requests.get("https://v2.jokeapi.dev/joke/Misc").json()
+        joke = requests.get("https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky,Christmas?blacklistFlags=nsfw,religious,political,racist,sexist,explicit").json()
         if joke["type"] == "twopart":
             await ctx.send(joke["setup"])
             time.sleep(2)
