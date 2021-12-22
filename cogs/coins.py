@@ -129,7 +129,7 @@ class Coins(commands.Cog):
 
         for guild in self.bot.guilds:
             wealthyRole = discord.utils.get(guild.roles, name=self.wealthyRole)
-            poorRole = discord.utils.get(guild.roles, name=self.wealthyRole)
+            poorRole = discord.utils.get(guild.roles, name=self.poorRole)
             if(not wealthyRole):
                 print("server \""+str(guild.name)+"\" does not have a wealthy role, making wealthy role \""+self.wealthyRole+"\" now. . .")
                 await guild.create_role(name=self.wealthyRole, colour=discord.Colour(0x00ff00))
