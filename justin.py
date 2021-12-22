@@ -69,8 +69,7 @@ for filename in os.listdir("/home/pi/Desktop/Justin-bot/cogs"):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
 # wait till an internet connection is established before trying to login
-hasConnected = False
-while(not hasConnected):
+while(True):
     try:
         # will throw an error if not on internet
         urllib.request.urlopen("http://google.com")
@@ -79,5 +78,5 @@ while(not hasConnected):
         time.sleep(10)
         continue
     bot.run(TOKEN)
-    hasConnected = True
+    break
 
