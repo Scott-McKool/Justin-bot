@@ -6,5 +6,8 @@ cogs/__pycache__/*
 build/
 .vscode/
 
+# ignore coins database
+coins.db
+
 # ignore my raspberry pi setup
 raspberryPi.txt
