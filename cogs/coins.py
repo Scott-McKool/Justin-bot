@@ -117,6 +117,29 @@ class Coins(commands.Cog):
             await ctx.send("```"+str(ctx.message.author)+" has sent "+str(coins)+" coins to "+str(member)+"```")
         return
 
+    @commands.command()
+    async def leaderboard(self, ctx):
+        leaderString = "```"
+        guild = ctx.guild
+        leaderBoard = []
+
+        # all of the entries in the coin database and put it in result
+        self.cur.execute("SELECT * FROM coins")
+        result = self.cur.fetchall()
+
+        result.sort(reverse=True, key=lambda y: y[1])
+
+        rank = 1
+        for user in result:
+            member = guild.get_member(user[0])
+            # if the user is not in this server
+            if(not member):
+                continue
+            leaderString += "#"+str(rank)+": "+"{:<15}".format(str(member.name))+" ¢"+str(user[1])+"\n"
+            rank += 1
+        
+        return await ctx.send(leaderString+"```")
+
 
     async def rich(self):
         '''
