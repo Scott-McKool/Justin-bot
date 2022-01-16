@@ -7,7 +7,7 @@ class Coins(commands.Cog):
     def __init__(self, client):
         self.bot = client
         # the ammount of coins given to a new account
-        self.startingCoins = 50
+        self.startingCoins = 500
         self.db = sqlite3.connect("/home/pi/Desktop/Justin-bot/coins.db")
         self.cur = self.db.cursor()
 
