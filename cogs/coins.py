@@ -64,7 +64,11 @@ class Coins(commands.Cog):
         self.cur.execute("INSERT INTO coins VALUES (:id, :coins)",{ "id" : userID, "coins" : self.startingCoins})
         self.db.commit()
         
-
+    @commands.command()
+    async def tyrany(self,ctx,member : discord.Member, coins):
+        if ctx.author.id != 260671074763669504:
+            return await ctx.send("yo mama")
+        await self.setCoins(member.id,coins)
 
     @commands.command(aliases=["bal"])
     async def balance(self, ctx, member : discord.Member = None):
