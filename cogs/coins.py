@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import sqlite3
+import random
+import time
 
 class Coins(commands.Cog):
 
@@ -14,11 +16,11 @@ class Coins(commands.Cog):
         self.wealthyRole = "Wealthy" # the roll to give people who are wealthy
         self.poorRole = "Poor" # the roll to give people who are poor!
 
-        #self.cur.execute("""DELETE FROM coins WHERE id = :id""",{"coins" : 49, "id" : 663214109726081036})
-        #self.db.commit()
+        # list to keep track of robbery cooldowns
+        self.robList = {}
+        # how long is the robbery cooldown in seconds (3600 seconds per hour)
+        self.robCooldown = 3600*12
 
-        #self.cur.execute("""CREATE TABLE coins (id integer, coins integer)""")
-        #self.db.commit()
         # help message for the coins commands
         self.coinsCommands = "```Coins Help: \n!balance // will show the balance of your account \n!balance <@user> // show the balance of the mentioned account \n!pay <@user> <amount> <note> // transfers the given amount of money to the user```"
 
@@ -53,7 +55,7 @@ class Coins(commands.Cog):
         Relies on the setCoin meathod
         '''
         curCoins = self.getCoins(userID)
-        await self.setCoins(userID, curCoins+coins)
+        await self.setCoins(userID, round(curCoins+coins))
 
     def account(self, userID):
         '''
@@ -64,11 +66,47 @@ class Coins(commands.Cog):
         self.cur.execute("INSERT INTO coins VALUES (:id, :coins)",{ "id" : userID, "coins" : self.startingCoins})
         self.db.commit()
         
-    @commands.command()
-    async def tyranny(self,ctx,member : discord.Member, coins):
-        if ctx.author.id != 260671074763669504:
-            return await ctx.send("yo mama")
-        await self.setCoins(member.id,coins)
+    @commands.command(aliases=["childSupport"])
+    async def rob(self, ctx, member : discord.Member = None):
+        author = ctx.message.author
+        if member.id == None:
+            await ctx.send("invalid person")
+            return      
+
+        # if this person has never before robbed someone
+        if not author.id in self.robList:
+            self.robList[author.id] = 0
+        # if the time since their last rob is less then the cooldown
+        if time.time() - self.robList[author.id] < self.robCooldown: 
+            # how long till they can rob again
+            timeTillRob = time.gmtime(self.robCooldown - (time.time() - self.robList[author.id]))
+            timeTillRobStr = (str(timeTillRob.tm_hour)+" hours ")+(str(timeTillRob.tm_min)+" minutes ")
+            # tell them off
+            return await ctx.send("yo bitch ass can't rob people for another "+timeTillRobStr)
+        # set this as the last time they robbed
+        self.robList[author.id] = time.time()
+        # 60% chance of sucess
+        if random.random() > 0.6:
+            return await ctx.send("you failed to rob "+str(member))
+        authorCoins = self.getCoins(author.id)
+        userCoins = self.getCoins(member.id)
+        # get te diff between the attacker and victim. reduce the victim's wealth to nerf rich ppl. then devide by 500
+        coinDiff = ((userCoins*0.75)-authorCoins)/self.startingCoins
+        # multiply by 10 to get a sizable ammount of coins
+        coinDiff = (coinDiff * 10)
+        # make the diff the center of a normal distribution to add some randomness to the system
+        gain = round(random.gauss(coinDiff,3))
+        # affect the coins of each party
+        await self.addCoins(author.id,gain)
+        await self.addCoins(member.id,-gain)
+        # send some funny gain/loss messages
+        if gain > 0:
+            await ctx.send("you got the bag and stole "+str(abs(gain))+" kazzoins from "+str(member))
+            return await ctx.send("https://tenor.com/view/gun-firing-shooting-mask-gang-gif-17710088")
+        else:
+            await ctx.send("you fumbled the bag and lost "+str(abs(gain))+" kazzoins to "+str(member))
+            return await ctx.send("https://tenor.com/view/namztaes-sad-crying-boonk-gang-gif-23232403")        
+
 
     @commands.command(aliases=["bal"])
     async def balance(self, ctx, member : discord.Member = None):
