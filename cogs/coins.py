@@ -24,7 +24,7 @@ class Coins(commands.Cog):
         # list to keep track of flexing cooldowns
         self.flexList = {}
         # how long is the flexing cooldown in seconds (3600 seconds per hour)
-        self.flexCooldown = 3600*6
+        self.flexCooldown = 3600*2
 
         # help message for the coins commands
         self.coinsCommands = "```Coins Help: \n!balance // will show the balance of your account \n!balance <@user> // show the balance of the mentioned account \n!pay <@user> <amount> <note> // transfers the given amount of money to the user```"
@@ -78,10 +78,11 @@ class Coins(commands.Cog):
             await ctx.send("invalid person")
             return      
 
-        call = ctx.author.voice.channel
-        if call is None:
+        if ctx.author.voice is None:
             return await ctx.send("You're not in a voice channel.")
-        
+
+        call = ctx.author.voice.channel
+
         if member.voice is None:
             return await ctx.send("You have to be in the same call as the target.")
 
@@ -102,7 +103,7 @@ class Coins(commands.Cog):
             timeTillFlex = time.gmtime(self.flexCooldown - (time.time() - self.flexList[author.id]))
             timeTillFlexStr = (str(timeTillFlex.tm_hour)+" hours ")+(str(timeTillFlex.tm_min)+" minutes ")
             # tell them off
-            return await ctx.send("yo bitch ass can't rob people for another "+timeTillFlexStr)
+            return await ctx.send("yo bitch ass can't flex for another "+timeTillFlexStr)
         # set this as the last time they flexed
         self.flexList[author.id] = time.time()
         # send some funny message
