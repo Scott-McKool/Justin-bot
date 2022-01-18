@@ -21,6 +21,11 @@ class Coins(commands.Cog):
         # how long is the robbery cooldown in seconds (3600 seconds per hour)
         self.robCooldown = 3600*12
 
+        # list to keep track of flexing cooldowns
+        self.flexList = {}
+        # how long is the flexing cooldown in seconds (3600 seconds per hour)
+        self.flexCooldown = 3600*6
+
         # help message for the coins commands
         self.coinsCommands = "```Coins Help: \n!balance // will show the balance of your account \n!balance <@user> // show the balance of the mentioned account \n!pay <@user> <amount> <note> // transfers the given amount of money to the user```"
 
@@ -66,6 +71,47 @@ class Coins(commands.Cog):
         self.cur.execute("INSERT INTO coins VALUES (:id, :coins)",{ "id" : userID, "coins" : self.startingCoins})
         self.db.commit()
         
+    @commands.command(aliases=["beat"])
+    async def flex(self, ctx, member : discord.Member = None):
+        author = ctx.message.author
+        if member.id == None:
+            await ctx.send("invalid person")
+            return      
+
+        call = ctx.author.voice.channel
+        if call is None:
+            return await ctx.send("You're not in a voice channel.")
+        
+        if member.voice is None:
+            return await ctx.send("You have to be in the same call as the target.")
+
+        if member.voice.channel != call:
+            return await ctx.send("You have to be in the same call as the target.")
+
+        guild = ctx.guild
+        wealthyRole = discord.utils.get(guild.roles, name=self.wealthyRole)
+        if(wealthyRole not in author.roles):
+            return await ctx.send("broke bitch! only wealthy people can flex")
+
+        # if this person has never before flexed on someone
+        if not author.id in self.flexList:
+            self.flexList[author.id] = 0
+        # if the time since their last flex is less then the cooldown
+        if time.time() - self.flexList[author.id] < self.robCooldown: 
+            # how long till they can flex again
+            timeTillFlex = time.gmtime(self.flexCooldown - (time.time() - self.flexList[author.id]))
+            timeTillFlexStr = (str(timeTillFlex.tm_hour)+" hours ")+(str(timeTillFlex.tm_min)+" minutes ")
+            # tell them off
+            return await ctx.send("yo bitch ass can't rob people for another "+timeTillFlexStr)
+        # set this as the last time they flexed
+        self.flexList[author.id] = time.time()
+        # send some funny message
+        channel = self.bot.get_channel(830510114016329818)
+        await member.move_to(channel)
+        await ctx.send("Goodbye "+member.mention+", send me a postscard from blocksville.")
+        return await ctx.send("https://tenor.com/view/dedrick-williams-dedrick-flex-dedrick-xxx-xxxtentacion-xxxtentacion-killer-gif-22346694")
+
+
     @commands.command(aliases=["childSupport"])
     async def rob(self, ctx, member : discord.Member = None):
         author = ctx.message.author
@@ -163,7 +209,6 @@ class Coins(commands.Cog):
     async def leaderboard(self, ctx):
         leaderString = "```"
         guild = ctx.guild
-        leaderBoard = []
 
         # all of the entries in the coin database and put it in result
         self.cur.execute("SELECT * FROM coins")
