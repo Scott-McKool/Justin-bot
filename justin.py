@@ -25,10 +25,13 @@ async def ping(ctx):
 
 @bot.command()
 async def poll(ctx):
+    '''
+    Simple command that makes a poll embed with voting reactions
+    '''
     msg = ctx.message.content[5:]
     poll = discord.Embed(title="Poll", description=msg, colour=discord.Colour.blue())
-    poll.add_field(name="Agree", value=":white_check_mark:")
-    poll.add_field(name="Disagree", value=":no_entry_sign:")
+    poll.add_field(name="Yes", value=":white_check_mark:")
+    poll.add_field(name="No", value=":no_entry_sign:")
     poll.set_footer(text="Poll initiated by "+ctx.message.author.name)
 
     poll_msg = await ctx.send(embed=poll)
@@ -38,15 +41,12 @@ async def poll(ctx):
 
 @bot.command()
 async def pfp(ctx, member : discord.Member):
+    '''
+    pastes a given user's discord avitar in chat
+    '''
     if(not member):
         return await ctx.send("invalid member")
     return await ctx.send(member.avatar_url)
-
-@bot.command()
-async def lol(ctx):
-    eastern = timezone("US/Eastern")
-    date = eastern.localize(datetime(2021, 12, 9, 0, 0))
-    return await ctx.send(date)
 
 @tasks.loop(seconds=10)
 async def change_status():
@@ -74,7 +74,7 @@ while(True):
         # will throw an error if not on internet
         urllib.request.urlopen("http://google.com")
     except Exception as e:
-        print("failed to log in, not connected to internet, retrying in 10 seconds. . .")
+        print("did not log in, not connected to internet, retrying in 10 seconds. . .")
         time.sleep(10)
         continue
     bot.run(TOKEN)

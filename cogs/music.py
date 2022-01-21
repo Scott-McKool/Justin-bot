@@ -287,19 +287,25 @@ class Music(commands.Cog):
         #if it's friday
         if( weekday == 5 ):
             randomCheck = random.random()*100
-            shouldFriday = randomCheck <= 330
+            shouldFriday = randomCheck <= 33
             if(shouldFriday):
                 # check to see if 3+ people are in a call
                 for guild in self.bot.guilds:
                     # if there are no songs currently playing in this server
                     if(len(self.song_queue[guild.id]) == 0):
                         for channel in guild.voice_channels:
-                            if(len(channel.members) > 2):
+                            if(len(channel.members) > 0.2):
                                 try:
                                     VCClient = await channel.connect()
                                     self.isFriday = True
 
-                                    VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("https://ia801700.us.archive.org/20/items/RebeccaBlackFriday/Rebecca%20Black%20%20-%20Friday.mp3")), after=lambda error:self.bot.loop.create_task(self.endFriday(VCClient)))
+                                    if(randomCheck < 1):
+                                        bestAudio = pafy.new("https://www.youtube.com/watch?v=GnBMAls-c98").getbestaudio()
+                                        VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(bestAudio.url)), after=lambda error: self.bot.loop.create_task(self.endFriday(VCClient)))
+                                    else:
+                                        
+
+                                        VCClient.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("https://ia801700.us.archive.org/20/items/RebeccaBlackFriday/Rebecca%20Black%20%20-%20Friday.mp3")), after=lambda error:self.bot.loop.create_task(self.endFriday(VCClient)))
                                 except Exception as e:
                                     return
                         
