@@ -294,7 +294,7 @@ class Music(commands.Cog):
                     # if there are no songs currently playing in this server
                     if(len(self.song_queue[guild.id]) == 0):
                         for channel in guild.voice_channels:
-                            if(len(channel.members) > 0.2):
+                            if(len(channel.members) > 2):
                                 try:
                                     VCClient = await channel.connect()
                                     self.isFriday = True
