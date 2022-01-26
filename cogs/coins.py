@@ -130,6 +130,13 @@ class Coins(commands.Cog):
             timeTillRobStr = (str(timeTillRob.tm_hour)+" hours ")+(str(timeTillRob.tm_min)+" minutes ")
             # tell them off
             return await ctx.send("yo bitch ass can't rob people for another "+timeTillRobStr)
+
+        # if they tried to rob justinbot
+        if member.id == 663214109726081036:
+            await ctx.send("?????????????????????????????????")
+            time.sleep(3)
+            return await ctx.send("https://cdn.discordapp.com/attachments/476896177900486676/898855743510433802/69e48529b5dc35ebb8efe26e11aa929729c5d4f3046744c4c7583a383892b0d1_1-1.mp4")
+        
         # set this as the last time they robbed
         self.robList[author.id] = time.time()
         # 60% chance of sucess
