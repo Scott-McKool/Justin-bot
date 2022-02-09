@@ -10,8 +10,16 @@ class Coins(commands.Cog):
         self.bot = client
         # the ammount of coins given to a new account
         self.startingCoins = 500
+
         self.db = sqlite3.connect("/home/pi/Desktop/Justin-bot/coins.db")
         self.cur = self.db.cursor()
+
+        try:
+            self.cur.execute("""CREATE TABLE coins (id integer, coins integer)""")
+            self.db.commit()
+            print("making and using a new database")
+        except:
+            print("using existing coins database")
 
         self.wealthyRole = "Wealthy" # the roll to give people who are wealthy
         self.poorRole = "Poor" # the roll to give people who are poor!
