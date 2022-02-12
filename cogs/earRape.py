@@ -50,7 +50,8 @@ class EarRape(commands.Cog):
         rms = audioop.rms(wavContent.readframes(wavContent.getnframes()), wavContent.getsampwidth())
         os.remove(f"{pathToTmp}{fileNameWav}")
         if rms > self.earRapeThreshold:
-            await message.add_reaction("🔊") 
+            await message.add_reaction("🔊")
+            await message.add_reaction("⚠️") 
         
     async def analyzeYoutubeVideo(self, link, ctx, message):
         ctx.send("joe mama")
