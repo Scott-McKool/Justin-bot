@@ -64,7 +64,7 @@ async def change_status():
     await bot.change_presence(activity=discord.Game(string))
 
 
-for filename in os.listdir("/home/pi/Desktop/Justin-bot/cogs"):
+for filename in os.listdir("/home/pi/Justin-bot/cogs"):
     if(filename.endswith(".py")):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
