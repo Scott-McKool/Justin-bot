@@ -11,7 +11,7 @@ class EarRape(commands.Cog):
         super().__init__()
         self.bot = client
         # how many rms is considered ear rape
-        self.earRapeThreshold = 10000
+        self.earRapeThreshold = 16000
         # attachment formats that have audio in them
         self.videoAudioFormats = [
             "mp3",
@@ -28,7 +28,7 @@ class EarRape(commands.Cog):
         print("EarRape detection Cog is ready")
 
     async def analyzeDiscordAttachment(self, link, ctx, message):
-        pathToTmp = "tmp/"
+        pathToTmp = "/home/pi/Desktop/Justin-bot/tmp/"
         try: 
             os.mkdir(pathToTmp)
         except:
