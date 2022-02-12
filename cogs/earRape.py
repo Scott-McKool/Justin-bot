@@ -28,7 +28,11 @@ class EarRape(commands.Cog):
         print("EarRape detection Cog is ready")
 
     async def analyzeDiscordAttachment(self, link, ctx, message):
-        pathToTmp = "/home/pi/Desktop/Justin-bot/tmp/"
+        pathToTmp = "tmp/"
+        try: 
+            os.mkdir(pathToTmp)
+        except:
+            pass
 
         # name of file
         fileName = link.split("/")[-1]
