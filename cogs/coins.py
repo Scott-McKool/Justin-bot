@@ -152,10 +152,10 @@ class Coins(commands.Cog):
             return await ctx.send("you failed to rob "+str(member))
         authorCoins = self.getCoins(author.id)
         userCoins = self.getCoins(member.id)
-        # get te diff between the attacker and victim. reduce the victim's wealth to nerf rich ppl. then devide by 500
-        coinDiff = ((userCoins*0.75)-authorCoins)/self.startingCoins
-        # multiply by 10 to get a sizable ammount of coins
-        coinDiff = (coinDiff * 10)
+        # get te diff between the attacker and victim. reduce the victim's wealth to nerf rich ppl. then divide by 500
+        coinDiff = ((userCoins*0.95)-authorCoins)/self.startingCoins
+        # multiply by 5 to get a sizable ammount of coins
+        coinDiff = (coinDiff * 5)
         # make the diff the center of a normal distribution to add some randomness to the system
         gain = round(random.gauss(coinDiff,3))
         # affect the coins of each party
@@ -244,7 +244,7 @@ class Coins(commands.Cog):
             # if the user is not in this server
             if(not member):
                 continue
-            leaderString += "#"+str(rank)+": "+"{:<15}".format(str(member.name))+" ¢"+str(user[1])+"\n"
+            leaderString += "#"+str(rank)+": "+"{:<16}".format(str(member.name))+" ¢"+str(user[1])+"\n"
             rank += 1
         
         return await ctx.send(leaderString+"```")
@@ -260,8 +260,12 @@ class Coins(commands.Cog):
         avg = self.startingCoins
 
         for guild in self.bot.guilds:
+
             wealthyRole = discord.utils.get(guild.roles, name=self.wealthyRole)
             poorRole = discord.utils.get(guild.roles, name=self.poorRole)
+
+            
+
             if(not wealthyRole):
                 print("server \""+str(guild.name)+"\" does not have a wealthy role, making wealthy role \""+self.wealthyRole+"\" now. . .")
                 await guild.create_role(name=self.wealthyRole, colour=discord.Colour(0x00ff00))
@@ -273,20 +277,37 @@ class Coins(commands.Cog):
                 print("added \""+self.poorRole+"\" role to \""+str(guild.name)+"\"")
                 continue
             
+            #calculate standard dev
+            std_sum = 0
+            num_people = 0
             for user in result:
                 member = guild.get_member(user[0])
-                # if the number of coins is 0.5 times the average or less
+                # only count people in this server
                 if(not member):
                     continue
-                if(user[1] <= avg*0.5):
+                # count up people and the sum for standard deviation
+                num_people += 1
+                std_sum += (user[1] - avg) ** 2
+            std = (std_sum / (num_people - 1)) ** 0.5
+
+            for user in result:
+                member = guild.get_member(user[0])
+                if(not member):
+                    continue
+
+                # this user's number of standard deviations from the average
+                user_deviation = (user[1] - avg)/std
+
+                # if this user is 1 standard deviations below average
+                if(user_deviation <= -1):
                     # give poor role
                     await member.add_roles(poorRole)
                 else:
                     # take away poor role
                     if(poorRole in member.roles):
                         await member.remove_roles(poorRole)
-                # if the number of coins is 1.5 times the average or more
-                if(user[1] >= avg*1.5):
+                # if this users is 1 standard deviation above average
+                if(user_deviation >= 1):
                     # give wealthy role
                     await member.add_roles(wealthyRole)
                 else:
