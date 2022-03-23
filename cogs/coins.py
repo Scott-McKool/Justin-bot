@@ -81,6 +81,9 @@ class Coins(commands.Cog):
         
     @commands.command(aliases=["beat"])
     async def flex(self, ctx, member : discord.Member = None):
+        '''
+        A wealthy player can flex on another player to send them to the AFK channel 
+        '''
         author = ctx.message.author
         if member.id == None:
             await ctx.send("invalid person")
@@ -123,6 +126,9 @@ class Coins(commands.Cog):
 
     @commands.command(aliases=["childSupport"])
     async def rob(self, ctx, member : discord.Member = None):
+        '''
+        Rob a player for a chance to steal some of their kazoin
+        '''
         author = ctx.message.author
         if member.id == None:
             await ctx.send("invalid person")
@@ -172,6 +178,9 @@ class Coins(commands.Cog):
 
     @commands.command(aliases=["bal"])
     async def balance(self, ctx, member : discord.Member = None):
+        '''
+        prints a given user's coin balance
+        '''
         author = ctx.message.author
         user = member
         if user == None:
@@ -315,8 +324,8 @@ class Coins(commands.Cog):
                     if(wealthyRole in member.roles):
                         await member.remove_roles(wealthyRole)
 
-    @commands.command(aliases=["eco", "economy", "coins"])
-    async def _eco(self, ctx):
+    @commands.command(aliases=[ "economy", "coins"])
+    async def eco(self, ctx):
         await ctx.send(self.coinsCommands)
 
     
