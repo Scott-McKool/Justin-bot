@@ -51,7 +51,7 @@ async def pfp(ctx, member : discord.Member):
         return await ctx.send("invalid member")
     return await ctx.send(member.avatar_url)
 
-@tasks.loop(seconds=10)
+@tasks.loop(minutes=1)
 async def change_status():
     date = datetime.datetime(2022, 5, 5, 0, 0)
     event = "till Spring semester ends"
@@ -67,7 +67,7 @@ async def change_status():
     await bot.change_presence(activity=discord.Game(string))
 
 
-for filename in os.listdir("cogs"):
+for filename in os.listdir("/home/pi/Justin-bot/cogs"):
     if(filename.endswith(".py")):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
