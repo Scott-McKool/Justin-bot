@@ -53,8 +53,8 @@ async def pfp(ctx, member : discord.Member):
 
 @tasks.loop(seconds=10)
 async def change_status():
-    date = datetime(2021, 12, 10, 0, 0)
-    event = "till fall semester ends"
+    date = datetime.datetime(2022, 5, 5, 0, 0)
+    event = "till Spring semester ends"
     rawTimeString = str(date - datetime.datetime.now())
     if rawTimeString.__contains__(","):
         days , timeTillSchool = rawTimeString.split(",")
@@ -67,7 +67,7 @@ async def change_status():
     await bot.change_presence(activity=discord.Game(string))
 
 
-for filename in os.listdir("/home/pi/Justin-bot/cogs"):
+for filename in os.listdir("cogs"):
     if(filename.endswith(".py")):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
