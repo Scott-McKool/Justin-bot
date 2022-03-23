@@ -36,10 +36,10 @@ class Dice(commands.Cog):
             roll = round(random.random()*(diceType-1))+1
             diceSum = diceSum + roll
             if roll == 1 or roll == diceType:
-                diceResults = diceResults+"*"+str(roll)+"* "
+                diceResults = diceResults+"**"+str(roll)+"** "
             else:
                 diceResults = diceResults+str(roll)+" "
-        return await ctx.send(f"```{diceStr} = {diceSum}\n{diceResults}```")
+        return await ctx.send(f"{diceStr} = {diceSum}\n{diceResults}")
 
 def setup(client):
     client.add_cog(Dice(client))
