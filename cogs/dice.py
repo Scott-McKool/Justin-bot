@@ -1,6 +1,6 @@
+import asyncio
 import discord
 from discord.ext import commands
-import time
 import random
 
 class Dice(commands.Cog):
@@ -14,7 +14,7 @@ class Dice(commands.Cog):
     @commands.command()
     async def flip(self, ctx):
         await ctx.send("Flipping a coin. . .")
-        time.sleep(1)
+        await asyncio.sleep(1)
         if(round(random.random()) == 1):
             return await ctx.send("It's `heads`")
         else:

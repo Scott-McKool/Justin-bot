@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import time
+from asyncio import sleep
 import requests
 
 class Jokes(commands.Cog):
@@ -17,7 +17,7 @@ class Jokes(commands.Cog):
         joke = requests.get("https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky,Christmas?blacklistFlags=nsfw,religious,political,racist,sexist,explicit").json()
         if joke["type"] == "twopart":
             await ctx.send(joke["setup"])
-            time.sleep(2)
+            await sleep(2)
             return await ctx.send(joke["delivery"])
         else:
             return await ctx.send(joke["joke"])
