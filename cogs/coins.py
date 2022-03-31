@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 import sqlite3
@@ -11,9 +12,10 @@ class Coins(commands.Cog):
         # the ammount of coins given to a new account
         self.startingCoins = 500
 
-        self.db = sqlite3.connect("/home/pi/Justin-bot/coins.db")
+        self.db = sqlite3.connect("coins.db")
         self.cur = self.db.cursor()
 
+        # try and create a new coins database ( if it fails then one already exists )
         try:
             self.cur.execute("""CREATE TABLE coins (id integer, coins integer)""")
             self.db.commit()
@@ -148,7 +150,7 @@ class Coins(commands.Cog):
         # if they tried to rob justinbot
         if member.id == 663214109726081036:
             await ctx.send("?????????????????????????????????")
-            time.sleep(3)
+            await asyncio.sleep(3)
             return await ctx.send("https://cdn.discordapp.com/attachments/476896177900486676/898855743510433802/69e48529b5dc35ebb8efe26e11aa929729c5d4f3046744c4c7583a383892b0d1_1-1.mp4")
         
         # set this as the last time they robbed
