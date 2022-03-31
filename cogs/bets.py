@@ -18,6 +18,9 @@ class bet():
     def __repr__(self):
         return f"Event #{self.id} which expires on {self.date} and has the terms: {self.terms}"
 
+    async def getAuthor(self, client):
+        return await client.fetch_user(self.authorID)
+
     async def sendReminder(self, client):
         # find the message based on its ID
         # get the channel
@@ -29,14 +32,14 @@ class bet():
         # the users that should be notifies, start at [1:] to skip justinbot (who is always the first reaction)
         users = await message.reactions[0].users().flatten()
         # get the author from their ID
-        author = await client.fetch_user(self.authorID)
+        author = self.getAuthor(client)
         # add author to the list ov people to mention
         users.append(author)
         users = list(dict.fromkeys(users))
         for user in users[1:]:
             messageString += user.mention + " "
         messageString += "\n"
-        messageString += f"```\nthis is a reminder about the bet #{self.id} made by {author}:\n{self.terms}\n```"
+        messageString += f"```\nthis is a reminder about the bet #{self.id} made by {author}:\n\n{self.terms}\n```"
         # get context to send message
         ctx = await client.get_context(message)
         await ctx.send(messageString)
@@ -46,8 +49,9 @@ class Bets(commands.Cog):
     
     def __init__(self, client):
         self.client = client
+        self.betsDir = "bets/"
         try: 
-            os.mkdir("bets/")
+            os.mkdir(f"{self.betsDir}")
         except:
             pass
         
@@ -57,49 +61,100 @@ class Bets(commands.Cog):
         print("Bets Cog is ready")
         self.loadbets.start()
 
-    async def activateBet(self, filePath):
-        # open the file, 
-        f = open(f"bets/{filePath}")
-        # json decode its contents
-        dictBet = json.load(f)
-        # turn into a bet object and run the send reminder method
-        joebet = bet( dictBet["id"], dictBet["authorID"], dictBet["messageID"], dictBet["channelID"], dictBet["date"][0], dictBet["date"][1], dictBet["date"][2], dictBet["terms"])
-        await joebet.sendReminder(self.client)
-        # close and delete the file
-        f.close()
-        os.remove(f"bets/{filePath}")
+    def loadBetFile(self, id):
+        '''
+        loads a bet file to a bet object by id\n
+        returns the bet object, or None if no file with the given ID was found
+        '''
+        id = str(id)
+        # loop through the bet files
+        for filename in os.listdir(f"{self.betsDir}"):
+            # look for the bet by ID
+            if id in filename:
+                # open and decode the file
+                with open(f"{self.betsDir}{filename}") as file:
+                    betdict = json.load(file)
+                    tempBet = bet( betdict["id"], betdict["authorID"], betdict["messageID"], betdict["channelID"], betdict["date"][0], betdict["date"][1], betdict["date"][2], betdict["terms"])
+                    return tempBet
+        # return None if no bet file was found
+        return None
+    
 
-    @tasks.loop(hours=10)
+    def deleteBetFile(self, id):
+        '''
+        deletes a bet file by its ID\n
+        returnes true or false for if the file was or was not deleted
+        '''
+        id = str(id)
+        for file in os.listdir(f"{self.betsDir}"):
+            if id in file:
+                os.remove(f"{self.betsDir}{file}")
+                return True
+        return False
+
+    async def activateBet(self, id):
+        '''
+        load in a bet file, send a reminder, then deletes the bet file
+        '''
+        # load bet
+        tempBet = self.loadBetFile(id)
+        # send reminder
+        await tempBet.sendReminder(self.client)
+        # delete file
+        self.deleteBetFile(id)
+
+
+    @tasks.loop(seconds=10)
     async def loadbets(self):
-        files = os.listdir("bets/")
-        for file in files:
-            year, month, day, _id = file.split(",")
+        '''
+        loop to ocasionally run and activate any expired bets
+        '''
+        # loop through all the bets
+        for file in os.listdir(f"{self.betsDir}"):
+            # parse the file's title
+            year, month, day, id = file.split(",")
             date = datetime.datetime( int(year), int(month), int(day ) )
             # if the date has passed
             if date < datetime.datetime.now():
-                await self.activateBet(file)
+                # activate the bet
+                await self.activateBet(id)
+
+    @commands.command()
+    async def deletebet(self, ctx, betid):
+        '''
+        !deletebet <id> -- deletes a bet given its ID
+        '''
+        tempBet = self.loadBetFile(betid)
+        if ctx.author != tempBet.getAuthor():
+            return await ctx.send("Only the bet's author can delete this bet reminder")
+        if self.deleteBetFile(betid):
+            return await ctx.send(f"deleted bet #{betid}")
+        return await ctx.send(f"could not find a bet file with the id #{betid}")
+                
 
     @commands.command(aliases=["bets"])
     async def listbets(self, ctx):
         result = ""
-        files = os.listdir("bets/")
-        for file in files:
-            # open the file, 
-            f = open(f"bets/{file}")
-            # json decode its contents
-            dictBet = json.load(f)
-            # turn into a bet object and run the send reminder method
-            joebet = bet( dictBet["id"], dictBet["authorID"], dictBet["messageID"], dictBet["channelID"], dictBet["date"][0], dictBet["date"][1], dictBet["date"][2], dictBet["terms"])
-            # close and delete the file
-            f.close()
-            result += "```" + str(joebet) + "```"
-        await ctx.send(result )
+        # loop through all the bet files
+        for file in os.listdir(f"{self.betsDir}"):
+            # get the bet's ID
+            _year,_month,_day, id = file.split(",")
+            # load the bet file to an object
+            tempBet = self.loadBetFile(id)
+            # append the bet object's __repr__ to the list
+            result += "```" + str(tempBet) + "```"
+        # if the list was empty
+        if result == "":
+            return  await ctx.send("there are no active bets")
+        # send the lists
+        return await ctx.send(result )
 
     @commands.command()
     async def bet(self, ctx, month, day, year, *, terms : str = None):
         # the id for this bet
         id = int(time()*10000)
         # when should the bet expire
+        # put in a try-catch so that if any of the date conversion goes wrong the user can be notified
         try:
             eventDate = datetime.datetime(int(year), int(month), int(day))
         except :
@@ -110,7 +165,7 @@ class Bets(commands.Cog):
             eventDateString = eventDate.strftime("%B %d %Y")
             return await ctx.send(f"The date {eventDateString} is invalid because it is in the past")
         # give a conformation message
-        string = f"```Bet made by {ctx.author}\n#{id}\nExpires on {eventDate.strftime('%B %d %Y')}\n{terms}```\nReact with the checkmark to be notified when the bet expires"
+        string = f"```Bet made by {ctx.author}\n#{id}\nExpires on {eventDate.strftime('%B %d %Y')}\n\n{terms}```\nReact with the checkmark to be notified when the bet expires"
         # save a reverence to the message to later retreive the reacions and such
         message = await ctx.send(string)
         await message.add_reaction(u"\u2705")
@@ -118,7 +173,7 @@ class Bets(commands.Cog):
         curbet = bet(id, ctx.author.id, message.id, message.channel.id , eventDate.month, eventDate.day, eventDate.year, terms)
 
         # save the bet to a file
-        file = open(f"bets/{year},{month},{day},{id}.json", "w")
+        file = open(f"{self.betsDir}{year},{month},{day},{id}.json", "w")
         file.write(json.dumps(curbet, default=vars, indent=4))
         file.close()
 
