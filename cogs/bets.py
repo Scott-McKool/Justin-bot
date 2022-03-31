@@ -1,5 +1,4 @@
 from time import time
-from asyncio import sleep
 import discord
 from discord.ext import commands, tasks
 import datetime
@@ -125,7 +124,7 @@ class Bets(commands.Cog):
         !deletebet <id> -- deletes a bet given its ID
         '''
         tempBet = self.loadBetFile(betid)
-        if ctx.author != tempBet.getAuthor():
+        if ctx.author != await tempBet.getAuthor(self.client):
             return await ctx.send("Only the bet's author can delete this bet reminder")
         if self.deleteBetFile(betid):
             return await ctx.send(f"deleted bet #{betid}")
@@ -177,7 +176,6 @@ class Bets(commands.Cog):
         file.write(json.dumps(curbet, default=vars, indent=4))
         file.close()
 
-        
 
 def setup(client):
     client.add_cog(Bets(client))
