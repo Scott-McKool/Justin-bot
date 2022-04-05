@@ -12,7 +12,7 @@ class Coins(commands.Cog):
         # the ammount of coins given to a new account
         self.startingCoins = 500
 
-        self.db = sqlite3.connect("coins.db")
+        self.db = sqlite3.connect("/home/pi/Justin-bot/coins.db")
         self.cur = self.db.cursor()
 
         # try and create a new coins database ( if it fails then one already exists )
