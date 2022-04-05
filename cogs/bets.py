@@ -103,7 +103,7 @@ class Bets(commands.Cog):
         self.deleteBetFile(id)
 
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(hours=10)
     async def loadbets(self):
         '''
         loop to ocasionally run and activate any expired bets
