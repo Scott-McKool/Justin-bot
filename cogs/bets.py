@@ -48,7 +48,7 @@ class Bets(commands.Cog):
     
     def __init__(self, client):
         self.client = client
-        self.betsDir = "bets/"
+        self.betsDir = "/home/pi/Justin-bot/bets/"
         try: 
             os.mkdir(f"{self.betsDir}")
         except:
