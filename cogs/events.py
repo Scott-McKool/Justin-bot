@@ -65,7 +65,7 @@ class Reminder(commands.Cog):
 
     def loadEventFile(self, id):
         '''
-        loads an event file to a event object by id\n
+        loads an event file to an event object by id\n
         returns the event object, or None if no file with the given ID was found
         '''
         id = str(id)

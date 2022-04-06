@@ -2,8 +2,8 @@
 *.pyc
 cogs/__pycache__/*
 
-# ignore the bets files
-bets/
+# ignore the event reminder files
+events/
 *.json
 
 # ignore garbage made by VSCode
