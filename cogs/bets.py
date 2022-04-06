@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 import datetime
 import os
 import json
+from numpy import sort
 
 class bet():
     def __init__(self, id : int, authorID : int, messageID : int, channelID : int, month : int, day : int, year : int, terms : str):
@@ -135,7 +136,7 @@ class Bets(commands.Cog):
     async def listbets(self, ctx):
         result = ""
         # loop through all the bet files
-        for file in os.listdir(f"{self.betsDir}"):
+        for file in sort(os.listdir(f"{self.betsDir}")):
             # get the bet's ID
             _year,_month,_day, id = file.split(",")
             # load the bet file to an object
@@ -172,7 +173,7 @@ class Bets(commands.Cog):
         curbet = bet(id, ctx.author.id, message.id, message.channel.id , eventDate.month, eventDate.day, eventDate.year, terms)
 
         # save the bet to a file
-        file = open(f"{self.betsDir}{year},{month},{day},{id}.json", "w")
+        file = open(f"{self.betsDir}{str(year).zfill(4)},{str(month).zfill(2)},{str(day).zfill(2)},{id}.json", "w")
         file.write(json.dumps(curbet, default=vars, indent=4))
         file.close()
 
