@@ -29,13 +29,15 @@ class Event_Reminder():
         message = await channel.fetch_message(self.messageID)
         # string to send to chat
         messageString = ""
-        # the users that should be notifies, start at [1:] to skip justinbot (who is always the first reaction)
+        # the users that should be notifies, 
         users = await message.reactions[0].users().flatten()
         # get the author from their ID
-        author = self.getAuthor(client)
+        author = await self.getAuthor(client)
+        print(author)
         # add author to the list ov people to mention
         users.append(author)
         users = list(dict.fromkeys(users))
+        # start at [1:] to skip justinbot (who is always the first reaction)
         for user in users[1:]:
             messageString += user.mention + " "
         messageString += "\n"
