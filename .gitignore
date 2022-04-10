@@ -2,6 +2,9 @@
 *.pyc
 cogs/__pycache__/*
 
+# ignore the top secret NSA files (api token)
+topSecret.py
+
 # ignore the event reminder files
 events/
 *.json

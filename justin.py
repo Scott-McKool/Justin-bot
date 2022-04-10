@@ -4,10 +4,9 @@ import datetime
 import os
 import urllib.request
 import time
+import topSecret
 
 PREFIX = "!"
-
-TOKEN = "NjYzMjE0MTA5NzI2MDgxMDM2.XhFQRQ.5uhTIzQp_MRrTauge8DQ2vu9uE8"
 
 coolIntents = discord.Intents.default()
 coolIntents.members = True
@@ -80,6 +79,6 @@ while(True):
         print("did not log in, not connected to internet, retrying in 10 seconds. . .")
         time.sleep(10)
         continue
-    bot.run(TOKEN)
+    bot.run(topSecret.DISCORD_TOKEN)
     break
 
