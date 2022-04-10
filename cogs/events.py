@@ -5,6 +5,7 @@ import datetime
 import os
 from json import dumps, load
 from numpy import sort
+import justinConfig
 
 class Event_Reminder():
     def __init__(self, id : int, authorID : int, messageID : int, channelID : int, month : int, day : int, year : int, terms : str):
@@ -51,7 +52,7 @@ class Reminder(commands.Cog):
     
     def __init__(self, client):
         self.client = client
-        self.eventsDir = "/home/pi/Justin-bot/events/"
+        self.eventsDir = f"{justinConfig.BOT_DIR}events/"
         try: 
             os.mkdir(f"{self.eventsDir}")
         except:

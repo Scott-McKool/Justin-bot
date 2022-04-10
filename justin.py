@@ -4,7 +4,7 @@ import datetime
 import os
 import urllib.request
 import time
-import topSecret
+import justinConfig
 
 PREFIX = "!"
 
@@ -66,7 +66,7 @@ async def change_status():
     await bot.change_presence(activity=discord.Game(string))
 
 
-for filename in os.listdir("/home/pi/Justin-bot/cogs"):
+for filename in os.listdir(f"{justinConfig.BOT_DIR}cogs"):
     if(filename.endswith(".py")):
         bot.load_extension(f"cogs.{filename[:-3]}")
 
@@ -79,6 +79,6 @@ while(True):
         print("did not log in, not connected to internet, retrying in 10 seconds. . .")
         time.sleep(10)
         continue
-    bot.run(topSecret.DISCORD_TOKEN)
+    bot.run(justinConfig.DISCORD_TOKEN)
     break
 
