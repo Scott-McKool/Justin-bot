@@ -4,6 +4,7 @@ from re import findall
 import os
 import wave
 import audioop
+import justinConfig
 
 class EarRape(commands.Cog):
     
@@ -28,7 +29,7 @@ class EarRape(commands.Cog):
         print("EarRape detection Cog is ready")
 
     async def analyzeDiscordAttachment(self, link, ctx, message):
-        pathToTmp = "/home/pi/Justin-bot/tmp/"
+        pathToTmp = f"{justinConfig.BOT_DIR}tmp/"
         try: 
             os.mkdir(pathToTmp)
         except:

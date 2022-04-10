@@ -34,7 +34,6 @@ class Event_Reminder():
         users = await message.reactions[0].users().flatten()
         # get the author from their ID
         author = await self.getAuthor(client)
-        print(author)
         # add author to the list ov people to mention
         users.append(author)
         users = list(dict.fromkeys(users))
