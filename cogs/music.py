@@ -147,7 +147,13 @@ class Music(commands.Cog):
                 return await ctx.send("Thats not a real thing.")
 
             song = result[0]
-        songName = pafy.new(song).title
+
+        # make sure it's possible to extract data
+        songName = "joe mama"
+        try:
+            songName = pafy.new(song).title
+        except IOError as e:
+            return await ctx.send(f"Unable to extract video. error: `{e}`")
 
         if("hour" in songName.lower()):
             song = "https://www.youtube.com/watch?v=Ma6BhN_DHTo"
@@ -163,6 +169,7 @@ class Music(commands.Cog):
 
             self.song_queue[ctx.guild.id].append(song)
             return await ctx.send(f"Added song to queue: ({queue_len+1}) `{songName}`.")
+            
         self.songPlaying = True
         await self.play_song(ctx, song)
 
