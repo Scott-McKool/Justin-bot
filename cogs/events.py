@@ -16,8 +16,11 @@ class Event_Reminder():
         self.date = (month, day, year)
         self.terms = terms
 
-    def __repr__(self):
+    def __str__(self):
         return f"Event #{self.id} which expires on {self.date} and has the terms: {self.terms}"
+
+    def __repr__(self):
+        return self.__str__()
 
     async def getAuthor(self, client):
         return await client.fetch_user(self.authorID)
