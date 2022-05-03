@@ -52,8 +52,8 @@ async def pfp(ctx, member : discord.Member):
 
 @tasks.loop(minutes=1)
 async def change_status():
-    date = datetime.datetime(2022, 5, 5, 0, 0)
-    event = "till Spring semester ends"
+    date = datetime.datetime(2022, 8, 22, 0, 0)
+    event = "till Fall semester begins"
     rawTimeString = str(date - datetime.datetime.now())
     if rawTimeString.__contains__(","):
         days , timeTillSchool = rawTimeString.split(",")
