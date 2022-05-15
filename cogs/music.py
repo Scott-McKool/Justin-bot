@@ -3,8 +3,8 @@ import asyncio
 from discord.ext import commands, tasks
 import datetime
 import random
-import pafy
 import youtube_dl
+import pafy
 
 class Music(commands.Cog):
 

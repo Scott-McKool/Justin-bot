@@ -237,6 +237,7 @@ class Coins(commands.Cog):
     async def tyranny(self,ctx,member : discord.Member, coins):
         if ctx.author.id != 260671074763669504:
             return await ctx.send("yo mama")
+        self.getCoins(member.id)
         await self.setCoins(member.id,coins)
 
     @commands.command()
