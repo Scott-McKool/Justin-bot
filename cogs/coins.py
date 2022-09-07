@@ -157,7 +157,7 @@ class Coins(commands.Cog):
         # set this as the last time they robbed
         self.robList[author.id] = time.time()
         # 60% chance of sucess
-        if random.random() > 0.6:
+        if random.random() > 0.4:
             return await ctx.send("you failed to rob "+str(member))
         authorCoins = self.getCoins(author.id)
         userCoins = self.getCoins(member.id)
@@ -166,7 +166,7 @@ class Coins(commands.Cog):
         # multiply by 5 to get a sizable ammount of coins
         coinDiff = (coinDiff * 5)
         # make the diff the center of a normal distribution to add some randomness to the system
-        gain = round(random.gauss(coinDiff,3))
+        gain = round(random.gauss(coinDiff,1.25))
         # affect the coins of each party
         await self.addCoins(author.id,gain)
         await self.addCoins(member.id,-gain)
@@ -301,6 +301,8 @@ class Coins(commands.Cog):
                 # count up people and the sum for standard deviation
                 num_people += 1
                 std_sum += (user[1] - avg) ** 2
+            if num_people == 1:
+                num_people = 2
             std = (std_sum / (num_people - 1)) ** 0.5
 
             for user in result:
