@@ -156,8 +156,8 @@ class Coins(commands.Cog):
         
         # set this as the last time they robbed
         self.robList[author.id] = time.time()
-        # 60% chance of sucess
-        if random.random() > 0.4:
+        # 20% chance of failure
+        if random.random() > 0.8:
             return await ctx.send("you failed to rob "+str(member))
         authorCoins = self.getCoins(author.id)
         userCoins = self.getCoins(member.id)
