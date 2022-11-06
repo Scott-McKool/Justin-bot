@@ -21,12 +21,16 @@ BOT_DIR = "$PWD"
 CONFIGFILE
 
 ### install requirements
-
 echo "installing pip with apt. . ."
-apt update && apt install python3-pip 
+apt update && apt install python3-pip git
+
+# download repo
+git clone https://github.com/Scott-McKool/Justin-bot
+cd Justin-bot/
+
 # install python packages
 echo "installing requirements with pip3. . ."
-pip3 -r requirements.txt &&
+pip3 -r requirements.txt
 
 ### instal files
 # get files from release page of github when i put them there in the future LOLOLOLOLOL
