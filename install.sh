@@ -30,7 +30,7 @@ cd Justin-bot/
 
 # install python packages
 echo "installing requirements with pip3. . ."
-pip3 -r requirements.txt
+pip3 install -r requirements.txt
 
 ### instal files
 # get files from release page of github when i put them there in the future LOLOLOLOLOL
