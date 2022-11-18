@@ -62,4 +62,4 @@ echo ""
 echo "to dissable running on startup type 'sudo systemctl disable justinbot.service'"
 echo ""
 
-exit 0x
+exit 0
