@@ -24,10 +24,6 @@ CONFIGFILE
 echo "installing pip with apt. . ."
 apt update && apt install python3-pip git
 
-# download repo
-git clone https://github.com/Scott-McKool/Justin-bot
-cd Justin-bot/
-
 # install python packages
 echo "installing requirements with pip3. . ."
 pip3 install -r requirements.txt
