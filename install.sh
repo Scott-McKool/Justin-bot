@@ -17,7 +17,7 @@ read TOKEN
 echo "creating config file 'justinConfig.py'"
     cat > justinConfig.py <<CONFIGFILE
 DISCORD_TOKEN = "$TOKEN"
-BOT_DIR = "$PWD"
+BOT_DIR = "$PWD/"
 CONFIGFILE
 
 ### install requirements
