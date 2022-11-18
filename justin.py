@@ -8,7 +8,7 @@ import justinConfig
 
 PREFIX = "!"
 
-coolIntents = discord.Intents.default()
+coolIntents = discord.Intents.all()
 coolIntents.members = True
 
 bot = commands.Bot(command_prefix=PREFIX, intents=coolIntents)
