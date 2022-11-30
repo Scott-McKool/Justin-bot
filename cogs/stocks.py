@@ -19,8 +19,7 @@ maxPriceAge = 600 # 10 minutes
 #}
 priceCache = {}
 
-#justinConfig.BOT_DIR+
-accountsDir = "accounts/"
+accountsDir = justinConfig.BOT_DIR+"accounts/"
 
 class Account():
     def __init__(self, id, cashOnHand:int = startingMoney, portfolio:dict = {}) -> None:
