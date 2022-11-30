@@ -22,7 +22,7 @@ CONFIGFILE
 
 ### install requirements
 echo "installing pip with apt. . ."
-apt update && apt install python3-pip git -y
+apt update && apt install python3-pip -y
 
 # install python packages
 echo "installing requirements with pip3. . ."

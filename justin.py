@@ -6,12 +6,10 @@ import urllib.request
 import time
 import justinConfig
 
-PREFIX = "!"
-
 coolIntents = discord.Intents.default()
 coolIntents.members = True
 
-bot = commands.Bot(command_prefix=PREFIX, intents=coolIntents)
+bot = commands.Bot(command_prefix=justinConfig.PREFIX, intents=coolIntents)
 
 @bot.event
 async def on_ready():
