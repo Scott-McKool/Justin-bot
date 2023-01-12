@@ -1,4 +1,5 @@
 discord.py[voice]==1.7.3
-numpy
 youtube_dl
+yfinance
+numpy
 pafy

@@ -2,15 +2,15 @@ import os
 import json
 import time
 import discord
-import requests
 import justinConfig
+import yfinance as yf
 from discord.ext import commands
 
 # how many dollars does a new acount hove to start with
 startingMoney = 10000
 
 # how long should the script remember a price for before using the API to fetch the most recent price (seconds)
-maxPriceAge = 600 # 10 minutes
+maxPriceAge = 0 # 0 seconds
 
 # table of ticker prices and their ages
 # used to save and reuse stock prices in the short term to save on API calls
@@ -61,33 +61,20 @@ def loadAccount(id:int):
     acc.save()
     return acc
 
-
-def getData(ticker:str = ""):
-    # qeuery the API
-    data = requests.get(f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={justinConfig.API_TOKEN}")
-    obj = data.json()
-
-    # check for rate limit error
-    if "Note" in obj:
-        return None
-
-    obj = obj["Global Quote"]
-    return obj
-
-def getPrice(ticker:str = ""):
+def getPrice(symbol:str = ""):
     # search the price cache
-    if ticker in priceCache:
+    if symbol in priceCache:
         # check the age of the data
         # if the age of this price is less than the max, reuse it
-        if time.time() - priceCache[ticker][1] < maxPriceAge:
-            return priceCache[ticker][0]
-    # otherwise get the price from the API
-    data = getData(ticker)
-    if not data:
+        if time.time() - priceCache[symbol][1] < maxPriceAge:
+            return priceCache[symbol][0]
+    # otherwise get the price from yahoo finance
+    ticker = yf.Ticker(symbol)
+    if not ticker.info:
         return -1
-    price = float(data["05. price"])
+    price = ticker.info["regularMarketPrice"]
     # put this price into the cache for later use
-    priceCache[ticker] = (price, time.time())
+    priceCache[symbol] = (price, time.time())
     return price
 
 class Stocks(commands.Cog):
@@ -108,9 +95,9 @@ class Stocks(commands.Cog):
         price = getPrice(ticker)
 
         if not price:
-            return await ctx.send("Could not gett ticker price, check the ticker and try again in 1 minute")
+            return await ctx.send("Could not gett ticker price, check the name and try again")
         if price < 0:
-            return await ctx.send("Could not get ticker price, check the ticker and try again in 1 minute")
+            return await ctx.send("Could not get ticker price, check the name and try again")
         
         totalPrice = price * quantity
 
@@ -148,7 +135,7 @@ class Stocks(commands.Cog):
         account = loadAccount(authorID)
         price = getPrice(ticker)
         if price < 0:
-            return await ctx.send("Could not get ticker price, check the ticker and try again in 1 minute")
+            return await ctx.send("Could not get ticker price, check the name and try again")
         priceTotal = price * quantity
 
         # can the user afford this purchase
@@ -177,7 +164,7 @@ class Stocks(commands.Cog):
             return await ctx.send(f"Cannot sell {quantity} shares of {ticker}, you only own {sharesOwned} shares")
         price = getPrice(ticker)
         if price < 0:
-            return await ctx.send("Could not get ticker price, check the ticker and try again in 1 minute")
+            return await ctx.send("Could not get ticker price, check the name and try again")
         priceTotal = price * quantity
 
         # actually selling the shares
