@@ -72,7 +72,7 @@ def getPrice(symbol:str = ""):
     ticker = yf.Ticker(symbol)
     if not ticker.info:
         return -1
-    price = ticker.info["regularMarketPrice"]
+    price = ticker.fast_info["last_price"]
     # put this price into the cache for later use
     priceCache[symbol] = (price, time.time())
     return price
