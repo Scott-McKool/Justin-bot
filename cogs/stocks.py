@@ -72,7 +72,7 @@ def getPrice(symbol:str = ""):
     ticker = yf.Ticker(symbol)
     if not ticker.info:
         return -1
-    price = ticker.fast_info["last_price"]
+    price = round(ticker.fast_info["last_price"], 2)
     # put this price into the cache for later use
     priceCache[symbol] = (price, time.time())
     return price
@@ -136,7 +136,7 @@ class Stocks(commands.Cog):
         price = getPrice(ticker)
         if price < 0:
             return await ctx.send("Could not get ticker price, check the name and try again")
-        priceTotal = price * quantity
+        priceTotal = round(price * quantity, 2)
 
         # can the user afford this purchase
         if priceTotal > account.cashOnHand:
@@ -165,7 +165,7 @@ class Stocks(commands.Cog):
         price = getPrice(ticker)
         if price < 0:
             return await ctx.send("Could not get ticker price, check the name and try again")
-        priceTotal = price * quantity
+        priceTotal = round(price * quantity, 2)
 
         # actually selling the shares
         account.cashOnHand += priceTotal
