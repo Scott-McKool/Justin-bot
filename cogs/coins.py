@@ -161,10 +161,8 @@ class Coins(commands.Cog):
             return await ctx.send("you failed to rob "+str(member))
         authorCoins = self.getCoins(author.id)
         userCoins = self.getCoins(member.id)
-        # get te diff between the attacker and victim. then divide by 500
-        coinDiff = ((userCoins)-authorCoins)/self.startingCoins
-        # multiply by 5 to get a sizable ammount of coins
-        coinDiff = (coinDiff * 5)
+        # get te diff between the attacker and victim. then divide by 50
+        coinDiff = ((userCoins)-authorCoins)/50
         # make the diff the center of a normal distribution to add some randomness to the system
         gain = round(random.gauss(coinDiff,1.25))
         # affect the coins of each party
