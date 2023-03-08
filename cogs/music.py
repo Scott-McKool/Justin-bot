@@ -165,12 +165,54 @@ class Music(commands.Cog):
         if votes/numMembers > 0.5:
             embed = discord.Embed(title="Vote Successful", description=f"***Voting to black list \"{member.name}\" was succesful, they cannot play videos for 30 minutes.***", colour=discord.Colour.green())
             # set the timecode for when the user should be un-blackListed to 30 minutes in the future
-            self.blackListed.setdefault(serverID, {}).setdefault(member.id, time.time() + (3 * 60))
+            self.blackListed.setdefault(serverID, {}).setdefault(member.id, time.time() + (30 * 60))
             embed.set_footer(text="Voting has ended.")
             return await poll_msg.edit(embed=embed)
         
         # if half or less of the VC voted yes
         embed = discord.Embed(title="Vote Failed", description=f"*Voting to black list \"{member.name}\"has failed.*\n\n**Voting failed, the vote requires at least 51% of the members to vote yes.**", colour=discord.Colour.red())
+        embed.set_footer(text="Voting has ended.")
+        return await poll_msg.edit(embed=embed)
+
+    @commands.command()
+    async def skip(self, ctx):
+        # if the user 
+        if ctx.voice_client.channel.id != ctx.author.voice.channel.id:
+            return await ctx.send("you must be in the same VC as the bot to skip.")
+
+        poll = discord.Embed(title=ctx.message.author.name+" wants to skip the current song", description="\n\nmore than half of the voice call must vote for this to pass.", colour=discord.Colour.blue())
+        poll.add_field(name="To vote in favor of skipping the current song", value=":white_check_mark:")
+        poll.set_footer(text="Voting ends in 10 seconds.")
+
+        poll_msg = await ctx.send(embed=poll) # only returns temporary message, we need to get the cached message to get the reactions
+        poll_id = poll_msg.id
+
+        await poll_msg.add_reaction(u"\u2705") # yes
+        
+        time.sleep(10) # 10 seconds to vote
+
+        poll_msg = await ctx.channel.fetch_message(poll_id)
+        
+        # count up the number of people in the VC that voted
+        votes = 0
+        for reaction in poll_msg.reactions:
+            if reaction.emoji == u"\u2705":
+                async for user in reaction.users():
+                    if user.voice.channel.id == ctx.voice_client.channel.id and not user.bot:
+                        votes += 1
+
+        # the number of people in the same channel as the bot (minus 1 to account for the bot)
+        numMembers = len(ctx.voice_client.channel.members) - 1
+        # if more then half the members voted yes
+        if votes/numMembers > 0.5:
+            embed = discord.Embed(title="Vote Successful", description=f"***Voting sucessfull, skipping the current video.***", colour=discord.Colour.green())
+            # stop playing the current song, this will automatically play the next song in the queue
+            ctx.voice_client.stop()
+            embed.set_footer(text="Voting has ended.")
+            return await poll_msg.edit(embed=embed)
+        
+        # if half or less of the VC voted yes
+        embed = discord.Embed(title="Vote Failed", description=f"*Voting to skip the current video has failed.*\n\n**Voting failed, the vote requires at least 51% of the members to vote yes.**", colour=discord.Colour.red())
         embed.set_footer(text="Voting has ended.")
         return await poll_msg.edit(embed=embed)
 
