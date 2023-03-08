@@ -45,6 +45,19 @@ class Music(commands.Cog):
         duration = videoData.get("duration", None)
 
         return url, title, duration
+    
+    def isBlackListed(self, serverID:int, memberID:int):
+        '''Takes in a player id and returns the ammount of time in seconds a member is blackListed from pllaying youtube videos for.
+        if they are not blackListed, returns false'''
+        # the list of potentially blacklisted members in the given server
+        blackListedMembers = self.blackListed.get(serverID, {})
+        # the timecode for when the given member will no longer be blacklisted
+        blackListedUntil = blackListedMembers.get(memberID, 0)
+        # is the player currently blacklisted
+        timeRemaining = blackListedUntil - time.time()
+        if timeRemaining < 0:
+            return False
+        return round(timeRemaining)
 
     async def checkQueue(self, ctx):
         serverID = ctx.guild.id
@@ -116,6 +129,50 @@ class Music(commands.Cog):
         
         # if the bot is not playing a video
         await self.playAudio(ctx, url, video_title)
+
+    @commands.command(aliases=["joemama"])
+    async def blacklist(self, ctx, member:discord.Member):
+        serverID = ctx.guild.id
+        userID = member.id
+        if userID == None:
+            await ctx.send("you gotta give a person to shutup")
+            return
+        
+        poll = discord.Embed(title=ctx.message.author.name+" wants to black list"+member.name+" for 30 minutes", description=member.name+" will not be able to play videos for 30 minutes\n\nmore than half of the voice call must vote for this to pass.", colour=discord.Colour.blue())
+        poll.add_field(name="To vote in favor of blackisting", value=":white_check_mark:")
+        poll.set_footer(text="Voting ends in 10 seconds.")
+
+        poll_msg = await ctx.send(embed=poll) # only returns temporary message, we need to get the cached message to get the reactions
+        poll_id = poll_msg.id
+
+        await poll_msg.add_reaction(u"\u2705") # yes
+        
+        time.sleep(10) # 10 seconds to vote
+
+        poll_msg = await ctx.channel.fetch_message(poll_id)
+        
+        # count up the number of people in the VC that voted
+        votes = 0
+        for reaction in poll_msg.reactions:
+            if reaction.emoji == u"\u2705":
+                async for user in reaction.users():
+                    if user.voice.channel.id == ctx.voice_client.channel.id and not user.bot:
+                        votes += 1
+
+        # the number of people in the same channel as the bot (minus 1 to account for the bot)
+        numMembers = len(ctx.voice_client.channel.members) - 1
+        # if more then half the members voted yes
+        if votes/numMembers > 0.5:
+            embed = discord.Embed(title="Vote Successful", description=f"***Voting to black list \"{member.name}\" was succesful, they cannot play videos for 30 minutes.***", colour=discord.Colour.green())
+            # set the timecode for when the user should be un-blackListed to 30 minutes in the future
+            self.blackListed.setdefault(serverID, {}).setdefault(member.id, time.time() + (3 * 60))
+            embed.set_footer(text="Voting has ended.")
+            return await poll_msg.edit(embed=embed)
+        
+        # if half or less of the VC voted yes
+        embed = discord.Embed(title="Vote Failed", description=f"*Voting to black list \"{member.name}\"has failed.*\n\n**Voting failed, the vote requires at least 51% of the members to vote yes.**", colour=discord.Colour.red())
+        embed.set_footer(text="Voting has ended.")
+        return await poll_msg.edit(embed=embed)
 
 
 def setup(client):
