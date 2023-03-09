@@ -17,17 +17,12 @@ class Music(commands.Cog):
         # dict with server IDs as keys and bool as values
         self.isPlaying = {}
 
-    def setup(self):
-        print()
-        pass
-
     @commands.Cog.listener()
     async def on_ready(self):
-        self.setup()
         print("Music Cog is ready")
 
     def searchVideo(self, name):
-        '''takes in a string name as a video title and returns a tuple of the direct link to the audio and the video title'''
+        '''takes in a string name as a video title and returns a tuple of the direct link to the audio, the video title, and duration'''
         with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
             try:
                 # try and visit the passed name on the web
@@ -76,7 +71,7 @@ class Music(commands.Cog):
         # marks this server as now playing a video
         self.isPlaying[ctx.guild.id] = True
         # before options to that the ffmpeg stret will try to reconnect if interupted
-        beforeOptions = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'}
+        beforeOptions = '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
         # play the audio from the source URL
         ctx.voice_client.play(discord.PCMVolumeTransformer(
             discord.FFmpegPCMAudio(url,
@@ -88,6 +83,7 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["Play"])
     async def play(self, ctx, *, title=None):
+        '''Play the audio from a youtube video, give a youtube link or search terms'''
         serverID = ctx.guild.id
 
         blackListed = self.isBlackListed(serverID, ctx.author.id)
@@ -130,8 +126,9 @@ class Music(commands.Cog):
         # if the bot is not playing a video
         await self.playAudio(ctx, url, video_title)
 
-    @commands.command(aliases=["joemama"])
+    @commands.command(aliases=["shutup"])
     async def blacklist(self, ctx, member:discord.Member):
+        '''start a vote to black list someone from playing videos'''
         serverID = ctx.guild.id
         userID = member.id
         if userID == None:
@@ -176,9 +173,13 @@ class Music(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx):
-        # if the user 
+        # if the user is not in the same call as the bot
         if ctx.voice_client.channel.id != ctx.author.voice.channel.id:
             return await ctx.send("you must be in the same VC as the bot to skip.")
+        
+        # if the bot is not playing music
+        if self.isPlaying.setdefault(ctx.guild.id, False):
+            return await ctx.send("The bot is not currently playing a video.")
 
         poll = discord.Embed(title=ctx.message.author.name+" wants to skip the current song", description="\n\nmore than half of the voice call must vote for this to pass.", colour=discord.Colour.blue())
         poll.add_field(name="To vote in favor of skipping the current song", value=":white_check_mark:")
@@ -206,7 +207,7 @@ class Music(commands.Cog):
         # if more then half the members voted yes
         if votes/numMembers > 0.5:
             embed = discord.Embed(title="Vote Successful", description=f"***Voting sucessfull, skipping the current video.***", colour=discord.Colour.green())
-            # stop playing the current song, this will automatically play the next song in the queue
+            # stop playing the current video, this will automatically play the next video in the queue
             ctx.voice_client.stop()
             embed.set_footer(text="Voting has ended.")
             return await poll_msg.edit(embed=embed)
