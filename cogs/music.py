@@ -178,7 +178,7 @@ class Music(commands.Cog):
             return await ctx.send("you must be in the same VC as the bot to skip.")
         
         # if the bot is not playing music
-        if self.isPlaying.setdefault(ctx.guild.id, False):
+        if not self.isPlaying.setdefault(ctx.guild.id, False):
             return await ctx.send("The bot is not currently playing a video.")
 
         poll = discord.Embed(title=ctx.message.author.name+" wants to skip the current song", description="\n\nmore than half of the voice call must vote for this to pass.", colour=discord.Colour.blue())
