@@ -1,13 +1,14 @@
 #!/usr/bin/python3
-import discord
 from discord.ext import commands, tasks
-import datetime
-import os
 import urllib.request
-import time
 import justinConfig
+import datetime
+import discord
+import asyncio
+import time
+import os
 
-coolIntents = discord.Intents.default()
+coolIntents = discord.Intents.all()
 coolIntents.members = True
 
 bot = commands.Bot(command_prefix=justinConfig.PREFIX, intents=coolIntents)
@@ -67,7 +68,7 @@ async def change_status():
 
 for filename in os.listdir(f"{justinConfig.BOT_DIR}cogs"):
     if(filename.endswith(".py")):
-        bot.load_extension(f"cogs.{filename[:-3]}")
+        asyncio.run(bot.load_extension(f"cogs.{filename[:-3]}"))
 
 # wait till an internet connection is established before trying to login
 while(True):

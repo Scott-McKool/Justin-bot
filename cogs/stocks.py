@@ -177,5 +177,5 @@ class Stocks(commands.Cog):
         return await ctx.send(f"You have sold {quantity} shares of {ticker} for ${priceTotal}")
 
 
-def setup(client):
-    client.add_cog(Stocks(client))
+async def setup(client):
+    await client.add_cog(Stocks(client))

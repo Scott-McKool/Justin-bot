@@ -41,5 +41,5 @@ class Dice(commands.Cog):
                 diceResults = diceResults+str(roll)+" "
         return await ctx.send(f"{diceStr} = {diceSum}\n{diceResults}")
 
-def setup(client):
-    client.add_cog(Dice(client))
+async def setup(client):
+    await client.add_cog(Dice(client))

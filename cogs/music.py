@@ -218,5 +218,5 @@ class Music(commands.Cog):
         return await poll_msg.edit(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Music(client))
+async def setup(client):
+    await client.add_cog(Music(client))

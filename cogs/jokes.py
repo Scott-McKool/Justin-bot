@@ -22,5 +22,5 @@ class Jokes(commands.Cog):
         else:
             return await ctx.send(joke["joke"])
 
-def setup(client):
-    client.add_cog(Jokes(client))
+async def setup(client):
+    await client.add_cog(Jokes(client))

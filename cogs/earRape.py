@@ -85,5 +85,5 @@ class EarRape(commands.Cog):
                 
 
 
-def setup(client):
-    client.add_cog(EarRape(client))
+async def setup(client):
+    await client.add_cog(EarRape(client))
