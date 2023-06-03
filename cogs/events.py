@@ -34,7 +34,7 @@ class Event_Reminder():
         # string to send to chat
         messageString = ""
         # the users that should be notifies, 
-        users = await list(message.reactions[0].users()).flatten()
+        users = [user async for user in message.reactions[0].users()]
         # get the author from their ID
         author = await self.getAuthor(client)
         # add author to the list ov people to mention
