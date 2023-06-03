@@ -216,6 +216,17 @@ class Music(commands.Cog):
         embed = discord.Embed(title="Vote Failed", description=f"*Voting to skip the current video has failed.*\n\n**Voting failed, the vote requires at least 51% of the members to vote yes.**", colour=discord.Colour.red())
         embed.set_footer(text="Voting has ended.")
         return await poll_msg.edit(embed=embed)
+    
+    @commands.command()
+    async def leave(self, ctx):
+        serverID = ctx.guild.id
+        if self.isPlaying.get(serverID, False):
+            return await ctx.send("i'm playing music right now, shut up")
+            
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.disconnect()
+
+        await ctx.send("Not in a channel, dumbass.")
 
 
 async def setup(client):
