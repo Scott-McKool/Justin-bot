@@ -42,13 +42,13 @@ async def poll(ctx):
     await poll_msg.add_reaction(u"\U0001F6AB") # no
 
 @bot.command()
-async def pfp(ctx, member : discord.Member):
+async def pfp(ctx, member : discord.Member = None):
     '''
     pastes a given user's discord avitar in chat
     '''
     if(not member):
-        return await ctx.send("invalid member")
-    return await ctx.send(member.avatar_url)
+        return await ctx.send(ctx.author.display_avatar.url)
+    return await ctx.send(member.display_avatar.url)
 
 @tasks.loop(minutes=1)
 async def change_status():
