@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 from discord.ext import commands, tasks
-from zoneinfo import ZoneInfo
 import urllib.request
 import justinConfig
 import datetime
@@ -53,7 +52,7 @@ async def pfp(ctx, member : discord.Member = None):
 
 @tasks.loop(minutes=1)
 async def change_status():
-    date = datetime.datetime(2024, 12, 6, 0, 0, tzinfo=ZoneInfo("US/Eastern"))
+    date = datetime.datetime(2024, 12, 6, 10, 0)
     event = "Till Winter Break"
     rawTimeString = str(date - datetime.datetime.now())
     if rawTimeString.__contains__(","):
